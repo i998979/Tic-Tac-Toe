@@ -1,0 +1,15 @@
+main: to.epac.factorycraft.maptactoe.MapTacToe
+version: 1.0.0
+name: MapTacToe
+author: i998979
+description: Classic Tic Tac Toe game, but with maps & buttons
+api-version: 1.13
+
+commands:
+  maptactoe:
+    aliases: [mtt]
+    description: Main command
+    
+permissions:
+  MapTacToe.Admin:
+    description: Give access to all commands

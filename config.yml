@@ -1,0 +1,32 @@
+MapTacToe:
+  Board1:
+    Participants:
+      P1: 991d961c-b6b4-4d49-88e6-01788cf445dc
+      P2: AI(3)
+    Settings:
+      Width: 3
+      Height: 3
+      Win: 3
+      Time: 100
+      Expire: 2400
+    Locations:
+      Top:
+        ==: org.bukkit.Location
+        world: dungeon
+        x: 110.0
+        y: 6.0
+        z: 250.0
+        pitch: 0.0
+        yaw: 0.0
+      Bottom:
+        ==: org.bukkit.Location
+        world: dungeon
+        x: 110.0
+        y: 4.0
+        z: 248.0
+        pitch: 0.0
+        yaw: 0.0
+    Datas:
+    - BBB
+    - BBB
+    - BBB

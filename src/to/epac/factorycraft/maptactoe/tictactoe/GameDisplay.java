@@ -1,0 +1,34 @@
+package to.epac.factorycraft.maptactoe.tictactoe;
+
+import java.io.File;
+
+import com.bergerkiller.bukkit.common.map.MapDisplay;
+import com.bergerkiller.bukkit.common.map.MapTexture;
+
+import to.epac.factorycraft.maptactoe.MapTacToe;
+
+public class GameDisplay extends MapDisplay {
+	
+	private MapTacToe plugin = MapTacToe.inst();
+	
+	@Override
+	public void onTick() {
+		
+		if (this.properties.containsKey("State", String.class)) {
+			String state = this.properties.get("State", String.class);
+			
+			MapTexture img = null;
+			
+			switch (state) {
+				case "X":
+					img = MapTexture.fromImageFile(plugin.getDataFolder() + File.separator + "cross.png");
+					break;
+				case "O":
+					img = MapTexture.fromImageFile(plugin.getDataFolder() + File.separator + "circle.png");
+					break;
+			}
+			
+			this.getLayer().draw(img, 0, 0);
+		}
+	}
+}
