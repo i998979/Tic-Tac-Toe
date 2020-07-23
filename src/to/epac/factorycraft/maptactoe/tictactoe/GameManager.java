@@ -1,12 +1,14 @@
 package to.epac.factorycraft.maptactoe.tictactoe;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import to.epac.factorycraft.maptactoe.MapTacToe;
+import to.epac.factorycraft.maptactoe.tictactoe.participants.GameAI;
+import to.epac.factorycraft.maptactoe.tictactoe.participants.GamePlayer;
 
 public class GameManager {
 	
@@ -24,7 +26,7 @@ public class GameManager {
 	
 	
 	/**
-	 * Load configurations to memory
+	 * Load configurations into memory
 	 */
 	public void load() {
 		plugin.getLogger().info("Loading GameManager...");
@@ -44,7 +46,7 @@ public class GameManager {
             	Location top = conf.getLocation("MapTacToe." + id + ".Locations.Top");
             	Location btm = conf.getLocation("MapTacToe." + id + ".Locations.Bottom");
             	
-            	// TODO - Load incomplete game's data on world
+            	// TODO - Load incomplete game's data in world
             	
             	Game game = new Game(p1, p2, width, length, win, time, expire, top, btm);
             	games.add(game);
@@ -58,21 +60,31 @@ public class GameManager {
 	}
 	
 	/**
+	 * Save incomplete game's data into yml
+	 */
+	public void save() {
+		
+	}
+	
+	/**
 	 * Initialize game board, if playerA is GameAI, means AI has the first move, then place X for AI
 	 */
 	public void initialize() {
-		plugin.getLogger().info("Initializing game board...");
+		plugin.getLogger().info("Initializing game boards...");
 		
-		for (Game g : plugin.getGameManager().getGames()) {
+		for (Game game : plugin.getGameManager().getGames()) {
 			
-			// If AI has the first move priority
-			if (g.playerA instanceof GameAI) {
-				g.attemptAiMove();
-				g.swap();
+			// If AI has the first priority to move
+			if (game.playerA instanceof GameAI) {
+				game.attemptAiMove();
+				game.swap();
 			}
 		}
 	}
 	
+	/**
+	 * Load datas from yml, place them in world again
+	 */
 	public void refresh() {
 		
 	}
@@ -81,5 +93,24 @@ public class GameManager {
 	
 	public ArrayList<Game> getGames() {
 		return games;
+	}
+	
+	public Game getGame(UUID uuid) {
+		for (Game game : games) {
+			
+			if (game.playerA instanceof GamePlayer) {
+				GamePlayer gp = (GamePlayer) game.playerA;
+				if (gp.getUniqueId().equals(uuid))
+					return game;
+			}
+			
+			else if (game.playerB instanceof GamePlayer) {
+				GamePlayer gp = (GamePlayer) game.playerB;
+				if (gp.getUniqueId().equals(uuid))
+					return game;
+			}
+		}
+		
+		return null;
 	}
 }

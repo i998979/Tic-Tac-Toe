@@ -1,4 +1,4 @@
-package to.epac.factorycraft.maptactoe.tictactoe;
+package to.epac.factorycraft.maptactoe.tictactoe.participants;
 
 public interface GameParticipant {
 	

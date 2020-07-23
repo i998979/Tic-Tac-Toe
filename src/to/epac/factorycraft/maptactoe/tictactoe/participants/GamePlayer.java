@@ -1,4 +1,4 @@
-package to.epac.factorycraft.maptactoe.tictactoe;
+package to.epac.factorycraft.maptactoe.tictactoe.participants;
 
 import java.util.UUID;
 
@@ -11,14 +11,21 @@ public class GamePlayer implements GameParticipant {
 	public GamePlayer(OfflinePlayer player) {
 		this.player = player;
 	}
-
-	@Override
-	public String getName() {
-		return player.getName();
+	
+	
+	
+	public OfflinePlayer getPlayer() {
+		return player;
 	}
 	
 	public UUID getUniqueId() {
 		return player.getUniqueId();
 	}
 	
+	
+	
+	@Override
+	public String getName() {
+		return player.getName();
+	}
 }

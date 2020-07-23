@@ -12,7 +12,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import to.epac.factorycraft.maptactoe.MapTacToe;
 import to.epac.factorycraft.maptactoe.tictactoe.BoardState;
 import to.epac.factorycraft.maptactoe.tictactoe.Game;
-import to.epac.factorycraft.maptactoe.tictactoe.GamePlayer;
+import to.epac.factorycraft.maptactoe.tictactoe.participants.GamePlayer;
 import to.epac.factorycraft.maptactoe.utils.Utils;
 
 public class CellPickHandler implements Listener {
@@ -48,6 +48,8 @@ public class CellPickHandler implements Listener {
 		if (game == null) return;
 		
 		// Now we have the game of the button clicked
+		
+		
 		
 		if (game.playerA instanceof GamePlayer) {
 			GamePlayer gp = (GamePlayer) game.playerA;

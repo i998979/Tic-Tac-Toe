@@ -26,6 +26,10 @@ public class GameDisplay extends MapDisplay {
 				case "O":
 					img = MapTexture.fromImageFile(plugin.getDataFolder() + File.separator + "circle.png");
 					break;
+				default:
+					// If trying to place something special (player's head), retrieve from internet, async thread
+					img = MapTexture.fromImageFile(plugin.getDataFolder() + File.separator + state + ".png");
+					break;
 			}
 			
 			this.getLayer().draw(img, 0, 0);

@@ -11,6 +11,9 @@ import org.bukkit.inventory.ItemStack;
 import com.bergerkiller.bukkit.common.utils.ItemUtil;
 
 import to.epac.factorycraft.maptactoe.MapTacToe;
+import to.epac.factorycraft.maptactoe.tictactoe.participants.GameAI;
+import to.epac.factorycraft.maptactoe.tictactoe.participants.GameParticipant;
+import to.epac.factorycraft.maptactoe.tictactoe.participants.GamePlayer;
 
 public class Game {
 	
@@ -18,6 +21,8 @@ public class Game {
 		int row;
 		int col;
 	}
+	
+	public String id;
 	
 	/** Game board, indicates the cells are occupied or not */
 	public String[][] board;
@@ -59,6 +64,10 @@ public class Game {
 	
 	
 	
+	private String self = "O";
+	private String opponent = "X";
+	
+	
 	public Game(String p1, String p2, int width, int height, int win, int time, int expire, Location top, Location btm) {
 		this(width, height, win, time, expire, top, btm);
 		
@@ -76,6 +85,7 @@ public class Game {
 	}
 	
 	public Game(int width, int height, int win, int time, int expire, Location top, Location btm) {
+		
 		this.board = new String[width][height];
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < height; j++) {
@@ -110,6 +120,10 @@ public class Game {
 		this.top = top;
 		this.btm = btm;
 		this.expire = expire;
+		
+		// Whoever start first, use X, internal use only
+		this.self = "O";
+		this.opponent = "X";
 	}
 	
 	public void attemptAiMove() {
@@ -130,8 +144,10 @@ public class Game {
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
 				
-				if (boardLoc[i][j].equals(loc))
+				if (boardLoc[i][j].equals(loc)) {
 					board[i][j] = state.toString();
+					break;
+				}
 			}
 		}
 		
@@ -153,165 +169,161 @@ public class Game {
 		return false;
 	}
 	
-	
-	String self = "O";
-	String opponent = "X";
-	
-	// This is the evaluation function as discussed 
-	// in the previous article ( http://goo.gl/sJgv68 ) 
 	public int evaluate(String board[][]) {
-	    // Checking for Rows for X or O victory. 
-	    for (int row = 0; row < width; row++) {
-	        if (board[row][0] == board[row][1] && board[row][1] == board[row][2]) {
-	            if (board[row][0].equals(self))
-	                return +10;
-	            else if (board[row][0].equals(opponent))
-	                return -10;
-	        }
-	    }
+		// Check horizontal
+		for (int row = 0; row < width; row++) {
+			// TODO - Expand for larger board size
+			if (board[row][0] == board[row][1] && board[row][1] == board[row][2]) {
+				if (board[row][0].equals(self))
+					return +10;
+				else if (board[row][0].equals(opponent))
+					return -10;
+			}
+		}
 
-	    // Checking for Columns for X or O victory. 
-	    for (int col = 0; col < height; col++) {
-	        if (board[0][col] == board[1][col] && board[1][col] == board[2][col]) {
-	            if (board[0][col].equals(self))
-	                return +10;
-	            else if (board[0][col].equals(opponent))
-	                return -10;
-	        }
-	    }
+		// Check vertical 
+		for (int col = 0; col < height; col++) {
+			// TODO - Expand for larger board size
+			if (board[0][col] == board[1][col] && board[1][col] == board[2][col]) {
+				if (board[0][col].equals(self))
+					return +10;
+				else if (board[0][col].equals(opponent))
+					return -10;
+			}
+		}
 
-	    // Checking for Diagonals for X or O victory. 
-	    if (board[0][0] == board[1][1] && board[1][1] == board[2][2]) {
-	        if (board[0][0].equals(self))
-	            return +10;
-	        else if (board[0][0].equals(opponent))
-	            return -10;
-	    }
+		// Check diagonal
+		// TODO - Expand for larger board size
+		if (board[0][0] == board[1][1] && board[1][1] == board[2][2]) {
+			if (board[0][0].equals(self))
+				return +10;
+			else if (board[0][0].equals(opponent))
+				return -10;
+		}
+		
+		// Check anti-diagonal
+		// TODO - Expand for larger board size
+		if (board[0][2] == board[1][1] && board[1][1] == board[2][0]) {
+			if (board[0][2].equals(self))
+				return +10;
+			else if (board[0][2].equals(opponent))
+				return -10;
+		}
 
-	    if (board[0][2] == board[1][1] && board[1][1] == board[2][0]) {
-	        if (board[0][2].equals(self))
-	            return +10;
-	        else if (board[0][2].equals(opponent))
-	            return -10;
-	    }
-
-	    // Else if none of them have won then return 0 
-	    return 0;
+		// Else if none of them have won then return 0 
+		return 0;
 	}
-
-	// This is the minimax function. It considers all 
-	// the possible ways the game can go and returns 
-	// the value of the board 
+	
 	public int minimax(String board[][], int depth, Boolean isMax) {
-	    int score = evaluate(board);
+		int score = evaluate(board);
 
-	    // If Maximizer has won the game  
-	    // return his/her evaluated score 
-	    if (score == 10)
-	        return score;
+		// If Maximizer has won the game  
+		// return his/her evaluated score 
+		if (score == 10)
+			return score;
 
-	    // If Minimizer has won the game  
-	    // return his/her evaluated score 
-	    if (score == -10)
-	        return score;
+		// If Minimizer has won the game  
+		// return his/her evaluated score 
+		if (score == -10)
+			return score;
 
-	    // If there are no more moves and  
-	    // no winner then it is a tie 
-	    if (isMovesLeft(board) == false)
-	        return 0;
+		// If there are no more moves and  
+		// no winner then it is a tie 
+		if (isMovesLeft(board) == false)
+			return 0;
 
-	    // If this maximizer's move 
-	    if (isMax) {
-	        int best = -1000;
+		// If this maximizer's move 
+		if (isMax) {
+			int best = -1000;
 
-	        // Traverse all cells 
-	        for (int i = 0; i < height; i++) {
-	            for (int j = 0; j < width; j++) {
-	                // Check if cell is empty 
-	                if (board[i][j].isEmpty()) {
-	                    // Make the move 
-	                    board[i][j] = self;
+			// Traverse all cells
+			for (int i = 0; i < height; i++) {
+				for (int j = 0; j < width; j++) {
+					// Check if cell is empty
+					if (board[i][j].isEmpty()) {
+						// Make the move
+						board[i][j] = self;
 
-	                    // Call minimax recursively and choose 
-	                    // the maximum value 
-	                    best = Math.max(best, minimax(board, depth + 1, isMax));
+						// Call minimax recursively and choose
+						// the maximum value
+						best = Math.max(best, minimax(board, depth + 1, isMax));
 
-	                    // Undo the move 
-	                    board[i][j] = "";
-	                }
-	            }
-	        }
-	        return best;
-	    }
+						// Undo the move 
+						board[i][j] = "";
+					}
+				}
+			}
+			return best;
+		}
 
-	    // If this minimizer's move 
-	    else {
-	        int best = 1000;
+		// If this minimizer's move 
+		else {
+			int best = 1000;
 
-	        // Traverse all cells 
-	        for (int i = 0; i < height; i++) {
-	            for (int j = 0; j < width; j++) {
-	                // Check if cell is empty 
-	                if (board[i][j].isEmpty()) {
-	                    // Make the move
-	                    board[i][j] = opponent;
+			// Traverse all cells 
+			for (int i = 0; i < height; i++) {
+				for (int j = 0; j < width; j++) {
+					// Check if cell is empty 
+					if (board[i][j].isEmpty()) {
+						// Make the move
+						board[i][j] = opponent;
 
-	                    // Call minimax recursively and choose 
-	                    // the minimum value 
-	                    best = Math.min(best, minimax(board, depth + 1, !isMax));
+						// Call minimax recursively and choose 
+						// the minimum value 
+						best = Math.min(best, minimax(board, depth + 1, !isMax));
 
-	                    // Undo the move 
-	                    board[i][j] = "";
-	                }
-	            }
-	        }
-	        return best;
-	    }
+						// Undo the move 
+						board[i][j] = "";
+					}
+				}
+			}
+			return best;
+		}
 	}
 
 	// This will return the best possible 
 	// move for the player 
 	public Move findBestMove(String board[][]) {
-	    int bestVal = -1000;
-	    Move move = new Move();
-	    move.row = -1;
-	    move.col = -1;
+		int bestVal = -1000;
+		Move move = new Move();
+		move.row = -1;
+		move.col = -1;
 
-	    // Traverse all cells, evaluate minimax function  
-	    // for all empty cells. And return the cell  
-	    // with optimal value. 
-	    for (int i = 0; i < height; i++) {
-	        for (int j = 0; j < width; j++) {
-	            // Check if cell is empty
-	            if (board[i][j].isEmpty()) {
-	                // Make the move 
-	                board[i][j] = self;
+		// Traverse all cells, evaluate minimax function  
+		// for all empty cells. And return the cell  
+		// with optimal value. 
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+				// Check if cell is empty
+				if (board[i][j].isEmpty()) {
+					// Make the move 
+					board[i][j] = self;
 
-	                // compute evaluation function for this 
-	                // move. 
-	                int moveVal = minimax(board, 0, false);
+					// compute evaluation function for this 
+					// move. 
+					int moveVal = minimax(board, 0, false);
 
-	                // Undo the move 
-	                board[i][j] = "";
-	                
-	                // TODO - Save all scores, find the highest score,
-	                // randomly choose moves to make it not place the same everytime
-	                
-	                // If the value of the current move is 
-	                // more than the best value, then update 
-	                // best/ 
-	                if (moveVal > bestVal) {
-	                    move.row = i;
-	                    move.col = j;
-	                    bestVal = moveVal;
-	                }
-	            }
-	        }
-	    }
-	    
-	    MapTacToe.inst().getLogger().info("Best val is: " + bestVal);
-	    MapTacToe.inst().getLogger().info("The value of the best move is: " + move.row + ", " + move.col);
-	    
-	    return move;
+					// Undo the move 
+					board[i][j] = "";
+					
+					// TODO - Save all scores, find the highest score,
+					// randomly choose moves to make it not place the same everytime
+					
+					// If the value of the current move is 
+					// more than the best value, then update 
+					// best/ 
+					if (moveVal > bestVal) {
+						move.row = i;
+						move.col = j;
+						bestVal = moveVal;
+					}
+				}
+			}
+		}
+		
+		MapTacToe.inst().getLogger().info("Next best move is (" + move.row + ", " + move.col + ") with score " + bestVal);
+		// MapTacToe.inst().getLogger().info("Next best move of " + id + " is (" + move.row + ", " + move.col + ") with score " + bestVal);
+		
+		return move;
 	}
 }
