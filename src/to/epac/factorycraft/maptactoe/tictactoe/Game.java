@@ -10,6 +10,7 @@ import org.bukkit.inventory.ItemStack;
 
 import com.bergerkiller.bukkit.common.utils.ItemUtil;
 
+import to.epac.factorycraft.maptactoe.MapTacToe;
 import to.epac.factorycraft.maptactoe.tictactoe.participants.GameAI;
 import to.epac.factorycraft.maptactoe.tictactoe.participants.GameParticipant;
 import to.epac.factorycraft.maptactoe.tictactoe.participants.GamePlayer;
@@ -19,6 +20,13 @@ public class Game {
 	public class Move {
 		int row;
 		int col;
+		int val;
+		
+		public Move(int row, int col, int val) {
+			this.row = row;
+			this.col = col;
+			this.val = val;
+		}
 	}
 	
 	private String id;
@@ -129,13 +137,12 @@ public class Game {
 	 */
 	public boolean attemptAiMove() {
 		try {
-			// TODO - Find next best move and move
-			Move move = new Move();
-			// Move move = findBestMove();
+			// Find next best move and move
+			Move move = findBestMove();
 			
 			place(boardLoc[move.row][move.col], next);
-			
 			return true;
+			
 		} catch (NumberFormatException e) {
 			return false;
 		}
@@ -174,7 +181,7 @@ public class Game {
 	 * 
 	 * @return True if there is a space, otherwise false
 	 */
-	public boolean isMovesLeft() {
+	public boolean hasMovesLeft() {
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
 				if (board[i][j].isEmpty()) return true;
@@ -183,6 +190,169 @@ public class Game {
 		return false;
 	}
 	
+	public Move findBestMove() {
+		Move move = new Move(-1, -1, -1000);
+		
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+				
+				if (board[i][j].isEmpty()) {
+					
+					board[i][j] = self;
+					
+					int moveVal = minimax(0, false);
+					
+					board[i][j] = "";
+					
+					if (moveVal > move.val) {
+						move.row = i;
+						move.col = j;
+						move.val = moveVal;
+					}
+				}
+			}
+		}
+		
+		MapTacToe.inst().getLogger().info("Next best move is (" + move.row + ", " + move.col + ") with score " + move.val);
+		// MapTacToe.inst().getLogger().info("Next best move of " + id + " is (" + move.row + ", " + move.col + ") with score " + bestVal);
+		
+		return move;
+	}
 	
-	
+	public int minimax(int depth, boolean isMax) {
+		int score = evaluate();
+		
+		if (score == 10 || score == -10)
+			return score;
+		
+		if (hasMovesLeft())
+			return 0;
+		
+		if (isMax) {
+			int best = -1000;
+			
+			for (int i = 0; i < height; i++) {
+				for (int j = 0; j < width; j++) {
+					
+					if (board[i][j].isEmpty()) {
+						board[i][j] = self;
+						
+						best = Math.max(best, minimax(depth + 1, isMax));
+						
+						board[i][j] = "";
+					}
+				}
+			}
+			return best;
+		}
+		else {
+			int best = 1000;
+			
+			for (int i = 0; i < height; i++) {
+				for (int j = 0; j < width; j++) {
+					
+					if (board[i][j].isEmpty()) {
+						
+						board[i][j] = opponent;
+						
+						best = Math.min(best, minimax(depth + 1, !isMax));
+						
+						board[i][j] = "";
+					}
+				}
+			}
+			return best;
+		}
+	}
+
+	public int evaluate() {
+		
+		// Count for self win
+		int swin = 0;
+		// Count for opponent win
+		int owin = 0;
+		
+		// Check horizontal
+		for (int row = 0; row < width; row++) {
+			for (int i = 0; i < height; i++) {
+				if (board[row][i].equals(self)) {
+					swin++;
+					owin = 0;
+				}
+				if (board[row][i].equals(opponent)) {
+					swin = 0;
+					owin++;
+				}
+				if (swin == win)
+					return 10;
+				if (owin == win)
+					return -10;
+			}
+		}
+		
+		if (swin != win) swin = 0;
+		if (owin != win) owin = 0;
+		
+		// Check vertical
+		for (int col = 0; col < height; col++) {
+			for (int i = 0; i < width; i++) {
+				if (board[i][col].equals(self)) {
+					swin++;
+					owin = 0;
+				}
+				if (board[i][col].equals(opponent)) {
+					swin = 0;
+					owin++;
+				}
+				if (swin == win)
+					return 10;
+				if (owin == win)
+					return -10;
+			}
+		}
+		
+		if (swin != win) swin = 0;
+		if (owin != win) owin = 0;
+		
+		// Check diagonal
+		for (int col = 0; col < height; col++) {
+			for (int row = 0; row < width; row++) {
+				if (board[row][col].equals(self)) {
+					swin++;
+					owin = 0;
+				}
+				if (board[row][col].equals(opponent)) {
+					swin = 0;
+					owin++;
+				}
+				if (swin == win)
+					return 10;
+				if (owin == win)
+					return -10;
+			}
+		}
+		
+		if (swin != win) swin = 0;
+		if (owin != win) owin = 0;
+		
+		// Check anti-diagonal
+		for (int col = height - 1; col >= 0; col--) {
+			for (int row = 0; row < width; row++) {
+				if (board[row][col].equals(self)) {
+					swin++;
+					owin = 0;
+				}
+				if (board[row][col].equals(opponent)) {
+					swin = 0;
+					owin++;
+				}
+				if (swin == win)
+					return 10;
+				if (owin == win)
+					return -10;
+			}
+		}
+		
+		return 0;
+	}
 }
