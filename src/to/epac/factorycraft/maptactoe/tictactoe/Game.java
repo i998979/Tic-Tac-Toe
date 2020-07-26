@@ -1,7 +1,5 @@
 package to.epac.factorycraft.maptactoe.tictactoe;
 
-import java.util.UUID;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -13,7 +11,6 @@ import com.bergerkiller.bukkit.common.utils.ItemUtil;
 import to.epac.factorycraft.maptactoe.MapTacToe;
 import to.epac.factorycraft.maptactoe.tictactoe.participants.GameAI;
 import to.epac.factorycraft.maptactoe.tictactoe.participants.GameParticipant;
-import to.epac.factorycraft.maptactoe.tictactoe.participants.GamePlayer;
 
 public class Game {
 	
@@ -51,7 +48,7 @@ public class Game {
 	public String[][] board;
 	public Location[][] boardLoc;
 	
-	public BoardState next = BoardState.X;
+	private BoardState next = BoardState.X;
 	
 	private long lastUpdate;
 	
@@ -62,32 +59,11 @@ public class Game {
 	
 	
 	
-	public Game(String id, int difficulty, String player1, String player2, int win, int time, long expire,
-			Location top, Location btm, int width, int height) {
-		
-		this(id, difficulty, win, time, expire, top, btm, width, height);
-		
-		GameParticipant p1 = null;
-		GameParticipant p2 = null;
-		
-		if (player1 != null)
-			if (player1.startsWith("AI"))
-				p1 = new GameAI(player1);
-			else
-				p1 = new GamePlayer(Bukkit.getOfflinePlayer(UUID.fromString(player1)));
-		
-		if (player2 != null)
-			if (player2.startsWith("AI"))
-				p2 = new GameAI(player2);
-			else
-				p2 = new GamePlayer(Bukkit.getOfflinePlayer(UUID.fromString(player2)));
-		
-		this.player1 = p1;
-		this.player2 = p2;
-	}
-	public Game(String id, int difficulty, int win, int time, long expire, Location top, Location btm, int width, int height) {
+	public Game(String id, GameParticipant player1, GameParticipant player2,
+			int win, int time, long expire, Location top, Location btm, int width, int height) {
 		this.id = id;
-		this.difficulty = difficulty;
+		this.player1 = player1;
+		this.player2 = player2;
 		this.win = win;
 		this.time = time;
 		this.expire = expire;
@@ -135,15 +111,20 @@ public class Game {
 	 * 
 	 * @return true if there is a move, otherwise false
 	 */
-	public boolean attemptAiMove() {
+	public boolean attemptAiMove(GameAI ai) {
 		try {
-			// Find next best move and move
-			Move move = findBestMove();
+			// Get GameAI's difficulty
+			int diff = ai.getDifficulty();
 			
-			place(boardLoc[move.row][move.col], next);
+			// Find next best move and move
+			Move move = findBestMove(diff);
+			
+			place(boardLoc[move.row][move.col], next, ai.getSymbol());
+			swap();
+			
 			return true;
 			
-		} catch (NumberFormatException e) {
+		} catch (Exception e) {
 			return false;
 		}
 	}
@@ -153,24 +134,26 @@ public class Game {
 	 * 
 	 * @param loc World location to place
 	 * @param state Symbol to place
+	 * @param symbol Symbol to draw
 	 */
-	public void place(Location loc, BoardState state) {
+	public void place(Location loc, BoardState state, String symbol) {
+		
 		// Place symbols into cell that match specified location
-		// TODO - break labels to avoid unnecessary checks
-		for (int i = 0; i < height; i++) {
-			for (int j = 0; j < width; j++) {
-				
-				if (boardLoc[i][j].equals(loc)) {
-					board[i][j] = state.toString();
-					break;
+		found:
+			for (int i = 0; i < height; i++) {
+				for (int j = 0; j < width; j++) {
+					
+					if (boardLoc[i][j].equals(loc)) {
+						board[i][j] = state.toString();
+						break found;
+					}
 				}
 			}
-		}
 		
 		loc.getBlock().setType(Material.AIR);
 		
 		ItemStack item = GameDisplay.createMapItem(GameDisplay.class);
-		ItemUtil.getMetaTag(item).putValue("State", state.toString());
+		ItemUtil.getMetaTag(item).putValue("State", symbol);
 		
 		ItemFrame frame = loc.getWorld().spawn(loc, ItemFrame.class);
 		frame.setItem(item);
@@ -190,7 +173,12 @@ public class Game {
 		return false;
 	}
 	
-	public Move findBestMove() {
+	/**
+	 * Find the best row&col to place
+	 * 
+	 * @return Best move
+	 */
+	public Move findBestMove(int diff) {
 		Move move = new Move(-1, -1, -1000);
 		
 		for (int i = 0; i < height; i++) {
@@ -200,7 +188,7 @@ public class Game {
 					
 					board[i][j] = self;
 					
-					int moveVal = minimax(0, false);
+					int moveVal = minimax(diff, false);
 					
 					board[i][j] = "";
 					
@@ -213,19 +201,27 @@ public class Game {
 			}
 		}
 		
-		MapTacToe.inst().getLogger().info("Next best move is (" + move.row + ", " + move.col + ") with score " + move.val);
-		// MapTacToe.inst().getLogger().info("Next best move of " + id + " is (" + move.row + ", " + move.col + ") with score " + bestVal);
+		MapTacToe.inst().getLogger().info("Next best move of " + id + " is (" + move.row + ", " + move.col + ") with score " + move.val);
 		
 		return move;
 	}
 	
+	/**
+	 * Maximize/minimize the score of self/opponent
+	 * 
+	 * @param depth How many steps will assume
+	 * @param isMax Maximize the score or not
+	 * @return Calculated score
+	 */
 	public int minimax(int depth, boolean isMax) {
 		int score = evaluate();
+		
+		Bukkit.broadcastMessage(score + "");
 		
 		if (score == 10 || score == -10)
 			return score;
 		
-		if (hasMovesLeft())
+		if (!hasMovesLeft())
 			return 0;
 		
 		if (isMax) {
@@ -235,6 +231,7 @@ public class Game {
 				for (int j = 0; j < width; j++) {
 					
 					if (board[i][j].isEmpty()) {
+						
 						board[i][j] = self;
 						
 						best = Math.max(best, minimax(depth + 1, isMax));
@@ -264,7 +261,12 @@ public class Game {
 			return best;
 		}
 	}
-
+	
+	/**
+	 * Evaluate the score of the moves
+	 * 
+	 * @return Score evaluated
+	 */
 	public int evaluate() {
 		
 		// Count for self win
@@ -315,44 +317,161 @@ public class Game {
 		if (owin != win) owin = 0;
 		
 		// Check diagonal
-		for (int col = 0; col < height; col++) {
-			for (int row = 0; row < width; row++) {
-				if (board[row][col].equals(self)) {
-					swin++;
-					owin = 0;
-				}
-				if (board[row][col].equals(opponent)) {
-					swin = 0;
-					owin++;
-				}
-				if (swin == win)
-					return 10;
-				if (owin == win)
-					return -10;
+		int n = height;
+		if (width < height) n = width;
+		
+		for (int i = 0; i < n; i++) {
+			if (board[i][i].equals(self)) {
+				swin++;
+				owin = 0;
 			}
+			if (board[i][i].equals(opponent)) {
+				swin = 0;
+				owin++;
+			}
+			if (swin == win)
+				return 10;
+			if (owin == win)
+				return -10;
 		}
 		
 		if (swin != win) swin = 0;
 		if (owin != win) owin = 0;
 		
 		// Check anti-diagonal
-		for (int col = height - 1; col >= 0; col--) {
-			for (int row = 0; row < width; row++) {
-				if (board[row][col].equals(self)) {
-					swin++;
-					owin = 0;
-				}
-				if (board[row][col].equals(opponent)) {
-					swin = 0;
-					owin++;
-				}
-				if (swin == win)
-					return 10;
-				if (owin == win)
-					return -10;
+		for (int i = 0; i < n; i++) {
+			if (board[i][n-i-1].equals(self)) {
+				swin++;
+				owin = 0;
 			}
+			if (board[i][n-i-1].equals(opponent)) {
+				swin = 0;
+				owin++;
+			}
+			if (swin == win)
+				return 10;
+			if (owin == win)
+				return -10;
 		}
 		
 		return 0;
+	}
+	
+	
+	
+	
+	
+	
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
+	}
+	
+	public int getDifficulty() {
+		return difficulty;
+	}
+	public void setDifficulty(int difficulty) {
+		this.difficulty = difficulty;
+	}
+	
+	public GameParticipant getPlayer1() {
+		return player1;
+	}
+	public void setPlayer1(GameParticipant player1) {
+		this.player1 = player1;
+	}
+	
+	public GameParticipant getPlayer2() {
+		return player2;
+	}
+	public void setPlayer2(GameParticipant player2) {
+		this.player2 = player2;
+	}
+	
+	public int getWin() {
+		return win;
+	}
+	public void setWin(int win) {
+		this.win = win;
+	}
+	
+	public int getTime() {
+		return time;
+	}
+	public void setTime(int time) {
+		this.time = time;
+	}
+	
+	public long getExpire() {
+		return expire;
+	}
+	public void setExpire(long expire) {
+		this.expire = expire;
+	}
+	
+	public Location getTop() {
+		return top;
+	}
+	public void setTop(Location top) {
+		this.top = top;
+	}
+	
+	public Location getBottom() {
+		return btm;
+	}
+	public void setBottom(Location btm) {
+		this.btm = btm;
+	}
+	
+	public int getWidth() {
+		return width;
+	}
+	public void setWidth(int width) {
+		this.width = width;
+	}
+	
+	public int getHeight() {
+		return height;
+	}
+	public void setHeight(int height) {
+		this.height = height;
+	}
+	
+	public BoardState getNext() {
+		return next;
+	}
+	public void setNext(BoardState next) {
+		this.next = next;
+	}
+	
+	public long getLastUpdate() {
+		return lastUpdate;
+	}
+	public void setLastUpdate(long lastUpdate) {
+		this.lastUpdate = lastUpdate;
+	}
+	
+	// Get winner of the game
+	public GameParticipant getWinner() {
+		return winner;
+	}
+	public void setWinner(GameParticipant winner) {
+		this.winner = winner;
+	}
+	
+	// Symbol represent Player1 & Player2
+	public String getSelf() {
+		return self;
+	}
+	public void setSelf(String self) {
+		this.self = self;
+	}
+	public String getOpponent() {
+		return opponent;
+	}
+	public void setOpponent(String opponent) {
+		this.opponent = opponent;
 	}
 }

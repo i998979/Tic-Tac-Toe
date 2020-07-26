@@ -15,11 +15,11 @@ public class GameDisplay extends MapDisplay {
 	public void onTick() {
 		
 		if (this.properties.containsKey("State", String.class)) {
-			String state = this.properties.get("State", String.class);
+			String symbol = this.properties.get("State", String.class);
 			
 			MapTexture img = null;
 			
-			switch (state) {
+			switch (symbol) {
 				case "X":
 					img = MapTexture.fromImageFile(plugin.getDataFolder() + File.separator + "cross.png");
 					break;
@@ -28,7 +28,7 @@ public class GameDisplay extends MapDisplay {
 					break;
 				default:
 					// If trying to place something special (player's head), retrieve from internet, async thread
-					img = MapTexture.fromImageFile(plugin.getDataFolder() + File.separator + state + ".png");
+					img = MapTexture.fromImageFile(plugin.getDataFolder() + File.separator + symbol);
 					break;
 			}
 			

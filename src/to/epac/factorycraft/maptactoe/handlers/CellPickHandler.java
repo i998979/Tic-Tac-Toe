@@ -12,6 +12,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import to.epac.factorycraft.maptactoe.MapTacToe;
 import to.epac.factorycraft.maptactoe.tictactoe.BoardState;
 import to.epac.factorycraft.maptactoe.tictactoe.Game;
+import to.epac.factorycraft.maptactoe.tictactoe.participants.GameAI;
 import to.epac.factorycraft.maptactoe.tictactoe.participants.GamePlayer;
 import to.epac.factorycraft.maptactoe.utils.Utils;
 
@@ -39,7 +40,7 @@ public class CellPickHandler implements Listener {
 		// Loop all games
 		for (Game g : plugin.getGameManager().getGames()) {
 			// Check if clicked button is in looping game's arena
-			if (Utils.locContains(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), g.btm, g.top)) {
+			if (Utils.locContains(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), g.getBottom(), g.getTop())) {
 				game = g;
 				break;
 			}
@@ -51,16 +52,18 @@ public class CellPickHandler implements Listener {
 		
 		
 		
-		if (game.playerA instanceof GamePlayer) {
-			GamePlayer gp = (GamePlayer) game.playerA;
+		if (game.getPlayer1() instanceof GamePlayer) {
+			GamePlayer gp = (GamePlayer) game.getPlayer1();
 			
 			event.setCancelled(true);
 			
 			if (gp.getUniqueId().equals(player.getUniqueId())) {
-				if (game.turn == BoardState.X) {
-					game.place(loc, BoardState.X);
+				if (game.getNext() == BoardState.X) {
+					game.place(loc, BoardState.X, gp.getSymbol());
 					game.swap();
-					game.attemptAiMove();
+					
+					if (game.getPlayer2() instanceof GameAI)
+						game.attemptAiMove((GameAI) game.getPlayer2());
 				}
 				else
 					player.sendMessage("¡±cThis is not your turn!");
@@ -69,16 +72,18 @@ public class CellPickHandler implements Listener {
 				player.sendMessage("¡±cYou are not participant of this game. Find another one.");
 			}
 		}
-		else if (game.playerB instanceof GamePlayer) {
-			GamePlayer gp = (GamePlayer) game.playerB;
+		else if (game.getPlayer2() instanceof GamePlayer) {
+			GamePlayer gp = (GamePlayer) game.getPlayer2();
 
 			event.setCancelled(true);
 			
 			if (gp.getUniqueId().equals(player.getUniqueId())) {
-				if (game.turn == BoardState.O) {
-					game.place(loc, BoardState.O);
+				if (game.getNext() == BoardState.O) {
+					game.place(loc, BoardState.O, gp.getSymbol());
 					game.swap();
-					game.attemptAiMove();
+					
+					if (game.getPlayer2() instanceof GameAI)
+						game.attemptAiMove((GameAI) game.getPlayer1());
 				}
 				else
 					player.sendMessage("¡±cThis is not your turn!");

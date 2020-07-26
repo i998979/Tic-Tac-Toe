@@ -2,35 +2,34 @@ package to.epac.factorycraft.maptactoe.tictactoe.participants;
 
 public class GameAI implements GameParticipant {
 	
-	private String name = "AI";
+	private String symbol;
 	private int diff = 1;
+	private boolean startFirst;
 	
-	public GameAI(String aiConfig) {
-		String conf = aiConfig.replaceAll("\\s", "");
-		
-		if (conf.startsWith("AI(")) {
-			try {
-				this.diff = Integer.parseInt(String.valueOf(conf.charAt(3)));
-			} catch (NumberFormatException e) {
-				this.diff = 1;
-			}
-		}
-	}
-	public GameAI(String name, int difficulty) {
-		this.name = name;
+	
+	
+	public GameAI(String symbol, int difficulty, boolean startFirst) {
+		this.symbol = symbol;
 		this.diff = difficulty;
+		this.startFirst = startFirst;
 	}
+	
+	
+	
 	
 	
 	
 	public int getDifficulty() {
 		return diff;
 	}
+	public boolean isStartFirst() {
+		return startFirst;
+	}
 	
 	
 	
 	@Override
-	public String getName() {
-		return name;
+	public String getSymbol() {
+		return symbol;
 	}
 }
