@@ -216,8 +216,6 @@ public class Game {
 	public int minimax(int depth, boolean isMax) {
 		int score = evaluate();
 		
-		Bukkit.broadcastMessage(score + "");
-		
 		if (score == 10 || score == -10)
 			return score;
 		
@@ -270,13 +268,16 @@ public class Game {
 	public int evaluate() {
 		
 		// Count for self win
-		int swin = 0;
+		// int swin = 0;
 		// Count for opponent win
-		int owin = 0;
+		// int owin = 0;
 		
 		// Check horizontal
-		for (int row = 0; row < width; row++) {
-			for (int i = 0; i < height; i++) {
+		for (int row = 0; row < height; row++) {
+			int swin = 0;
+			int owin = 0;
+			
+			for (int i = 0; i < width; i++) {
 				if (board[row][i].equals(self)) {
 					swin++;
 					owin = 0;
@@ -292,12 +293,15 @@ public class Game {
 			}
 		}
 		
-		if (swin != win) swin = 0;
-		if (owin != win) owin = 0;
+		// if (swin != win) swin = 0;
+		// if (owin != win) owin = 0;
 		
 		// Check vertical
-		for (int col = 0; col < height; col++) {
-			for (int i = 0; i < width; i++) {
+		for (int col = 0; col < width; col++) {
+			int swin = 0;
+			int owin = 0;
+			
+			for (int i = 0; i < height; i++) {
 				if (board[i][col].equals(self)) {
 					swin++;
 					owin = 0;
@@ -313,12 +317,15 @@ public class Game {
 			}
 		}
 		
-		if (swin != win) swin = 0;
-		if (owin != win) owin = 0;
+		// if (swin != win) swin = 0;
+		// if (owin != win) owin = 0;
 		
 		// Check diagonal
 		int n = height;
 		if (width < height) n = width;
+		
+		int swin = 0;
+		int owin = 0;
 		
 		for (int i = 0; i < n; i++) {
 			if (board[i][i].equals(self)) {
