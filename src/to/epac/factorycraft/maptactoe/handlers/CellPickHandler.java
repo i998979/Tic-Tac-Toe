@@ -10,7 +10,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 import to.epac.factorycraft.maptactoe.MapTacToe;
-import to.epac.factorycraft.maptactoe.tictactoe.BoardState;
+import to.epac.factorycraft.maptactoe.tictactoe.CellState;
 import to.epac.factorycraft.maptactoe.tictactoe.Game;
 import to.epac.factorycraft.maptactoe.tictactoe.participants.GameAI;
 import to.epac.factorycraft.maptactoe.tictactoe.participants.GamePlayer;
@@ -58,8 +58,8 @@ public class CellPickHandler implements Listener {
 			event.setCancelled(true);
 			
 			if (gp.getUniqueId().equals(player.getUniqueId())) {
-				if (game.getNext() == BoardState.X) {
-					game.place(loc, BoardState.X, gp.getSymbol());
+				if (game.getNext() == CellState.X) {
+					game.place(loc, CellState.X, gp.getSymbol());
 					game.swap();
 					
 					if (game.getPlayer2() instanceof GameAI)
@@ -78,8 +78,8 @@ public class CellPickHandler implements Listener {
 			event.setCancelled(true);
 			
 			if (gp.getUniqueId().equals(player.getUniqueId())) {
-				if (game.getNext() == BoardState.O) {
-					game.place(loc, BoardState.O, gp.getSymbol());
+				if (game.getNext() == CellState.O) {
+					game.place(loc, CellState.O, gp.getSymbol());
 					game.swap();
 					
 					if (game.getPlayer2() instanceof GameAI)
