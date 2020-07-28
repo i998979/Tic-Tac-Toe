@@ -52,7 +52,8 @@ public class Game {
 	private long lastUpdate;
 
 	private GameParticipant winner;
-
+	
+	// TODO - Redo X/O representation
 	private String self = "O";
 	private String opponent = "X";
 
@@ -98,6 +99,13 @@ public class Game {
 				boardLoc[i][j] = top.clone().subtract(addX, addY, addZ);
 			}
 		}
+		
+		// Default it is X start first, if P1 is AI, then make O start first
+		if (player1 instanceof GameAI) {
+			if (((GameAI) player1).isStartFirst()) {
+				next = CellState.O;
+			}
+		}
 	}
 
 	/** Swap which symbol should be placed in the current turn */
@@ -119,7 +127,6 @@ public class Game {
 			Move move = findBestMove(diff);
 
 			place(boardLoc[move.row][move.col], next, ai.getSymbol());
-			swap();
 
 			return true;
 

@@ -3,8 +3,8 @@ MapTacToe:
     Participants:
       AI:
         Symbol: "circle.png"
-        Difficulty: 0
-        StartFirst: false
+        Difficulty: 1
+        StartFirst: true
       PlayerA:
         Symbol: "cross.png"
         UUID: "991d961c-b6b4-4d49-88e6-01788cf445dc"

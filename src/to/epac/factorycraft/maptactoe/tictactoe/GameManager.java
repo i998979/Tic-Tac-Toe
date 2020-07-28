@@ -61,6 +61,7 @@ public class GameManager {
             	
             	// PlayerA, P1 when P2 exist, P2 when AI exist
             	String symbol = conf.getString("MapTacToe." + id + ".Participants.PlayerA.Symbol");
+            	// TODO - Set UUID when cell first click
             	String uuid = conf.getString("MapTacToe." + id + ".Participants.PlayerA.UUID");
             	
             	if (p1 == null)
