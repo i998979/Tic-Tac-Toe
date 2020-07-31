@@ -4,6 +4,7 @@ MapTacToe:
       AI:
         Symbol: "circle.png"
         Difficulty: 1
+        Delay: 20
         StartFirst: true
       PlayerA:
         Symbol: "cross.png"
@@ -15,9 +16,31 @@ MapTacToe:
     Settings:
       Width: 3
       Height: 3
+      Facing: EAST
       Win: 3
       Time: 100
       Expire: 2400
+    Commands:
+      Win:
+        AI:
+        - "say &aAI has won Tic Tac Toe %id% in fighting %loser%!"
+        Player:
+        - "say &a%winner% has won Tic Tac Toe %id% in fighting %loser%!"
+        - "eco give %winner% 10"
+      # Available: %winner% %loser%
+      Lose:
+        AI:
+        - "say &aAI has lost Tic Tac Toe %id% in fighting %winner%!"
+        Player:
+        - "say &a%loser% has lost Tic Tac Toe %id% in fighting %winner%!"
+        - "eco take %loser% 10"
+      Draw:
+        # Available: %opponent%
+        AI:
+        - "say &aAI has draw Tic Tac Toe %id% in fighting %opponent%!"
+        # Available: %p1% %p2%
+        Player:
+        - "say &a%p1% has draw Tic Tac Toe %id% in fighting %p2%!"
     Locations:
       Top:
         ==: org.bukkit.Location

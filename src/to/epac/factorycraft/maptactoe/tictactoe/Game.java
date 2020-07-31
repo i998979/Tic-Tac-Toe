@@ -1,15 +1,22 @@
 package to.epac.factorycraft.maptactoe.tictactoe;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.inventory.ItemStack;
 
 import com.bergerkiller.bukkit.common.utils.ItemUtil;
 
+import net.md_5.bungee.api.ChatColor;
 import to.epac.factorycraft.maptactoe.MapTacToe;
 import to.epac.factorycraft.maptactoe.tictactoe.participants.GameAI;
 import to.epac.factorycraft.maptactoe.tictactoe.participants.GameParticipant;
+import to.epac.factorycraft.maptactoe.tictactoe.participants.GamePlayer;
 
 public class Game {
 	
@@ -35,12 +42,16 @@ public class Game {
 	private int win;
 	private int time;
 	private long expire;
+	
+	private GameCommand cmd;
 
 	private Location top;
 	private Location btm;
 
 	private int width;
 	private int height;
+	
+	private BlockFace facing;
 
 
 
@@ -53,14 +64,13 @@ public class Game {
 
 	private GameParticipant winner;
 	
-	// TODO - Redo X/O representation
 	private String self = "O";
 	private String opponent = "X";
 
 
 
 	public Game(String id, GameParticipant player1, GameParticipant player2, int win, int time, long expire,
-			Location top, Location btm, int width, int height) {
+			GameCommand cmd, Location top, Location btm, int width, int height, BlockFace facing) {
 
 		this.id = id;
 		this.player1 = player1;
@@ -68,10 +78,12 @@ public class Game {
 		this.win = win;
 		this.time = time;
 		this.expire = expire;
+		this.cmd = cmd;
 		this.top = top;
 		this.btm = btm;
 		this.width = width;
 		this.height = height;
+		this.facing = facing;
 
 		this.board = new String[width][height];
 		// Initialize board
@@ -99,18 +111,116 @@ public class Game {
 				boardLoc[i][j] = top.clone().subtract(addX, addY, addZ);
 			}
 		}
-		
-		// Default it is X start first, if P1 is AI, then make O start first
-		if (player1 instanceof GameAI) {
-			if (((GameAI) player1).isStartFirst()) {
-				next = CellState.O;
-			}
-		}
 	}
 
 	/** Swap which symbol should be placed in the current turn */
 	public void swap() {
 		this.next = (this.next == CellState.X ? CellState.O : CellState.X);
+	}
+	
+	/**
+	 * Check the game has ended or not, if yes, execute the commands
+	 * 
+	 * @return The game has ended or not
+	 */
+	public boolean check() {
+		
+		// If there are no moves left, either someone won, or the board is full
+		if (!hasMovesLeft()) {
+			int score = evaluate();
+			
+			List<String> gcmd = new ArrayList<>();
+			
+			
+			
+			String winner = "";
+			String loser = "";
+			String opponent = "";
+			String p1 = "";
+			String p2 = "";
+			
+			// X win
+			if (score == -10) {
+				
+				if (player1 instanceof GameAI) {
+					winner = "AI";
+					gcmd.addAll(cmd.winAI);
+				} else if (player1 instanceof GamePlayer) {
+					winner = ((GamePlayer) player1).getPlayer().getName();
+					gcmd.addAll(cmd.winPlayer);
+				}
+				
+				
+				if (player2 instanceof GameAI) {
+					loser = "AI";
+					gcmd.addAll(cmd.loseAI);
+				} else if (player2 instanceof GamePlayer) {
+					loser = ((GamePlayer) player2).getPlayer().getName();
+					gcmd.addAll(cmd.losePlayer);
+				}
+			}
+			// O win
+			else if (score == 10) {
+				if (player1 instanceof GameAI) {
+					loser = "AI";
+					gcmd.addAll(cmd.loseAI);
+				} else if (player1 instanceof GamePlayer) {
+					loser = ((GamePlayer) player1).getPlayer().getName();
+					gcmd.addAll(cmd.losePlayer);
+				}
+				
+				
+				if (player2 instanceof GameAI) {
+					winner = "AI";
+					gcmd.addAll(cmd.winAI);
+				} else if (player2 instanceof GamePlayer) {
+					winner = ((GamePlayer) player2).getPlayer().getName();
+					gcmd.addAll(cmd.winPlayer);
+				}
+			}
+			// Draw
+			else {
+				if (player1 instanceof GamePlayer) {
+					p1 = ((GamePlayer) player1).getPlayer().getName();
+					
+					// Player vs Player
+					if (player2 instanceof GamePlayer) {
+						p2 = ((GamePlayer) player2).getPlayer().getName();
+						gcmd.addAll(cmd.drawPlayer);
+					}
+					// Player vs AI
+					else if (player2 instanceof GameAI) {
+						opponent = ((GamePlayer) player1).getPlayer().getName();
+						gcmd.addAll(cmd.drawAI);
+					}
+				}
+				if (player1 instanceof GameAI) {
+					p1 = "AI";
+					
+					// AI vs Player
+					if (player2 instanceof GamePlayer) {
+						opponent = ((GamePlayer) player2).getPlayer().getName();
+						gcmd.addAll(cmd.drawAI);
+					}
+				}
+			}
+			
+			for (String cmd : gcmd) {
+				cmd = cmd.replace("%id%", id)
+						.replace("%winner%", winner)
+						.replace("%loser%", loser)
+						.replace("%opponent%", opponent)
+						.replace("%p1%", p1)
+						.replace("%p2%", p2);
+				
+				cmd = ChatColor.translateAlternateColorCodes('&', cmd);
+				
+				Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
+			}
+			
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -119,17 +229,18 @@ public class Game {
 	 * @return true if there is a move, otherwise false
 	 */
 	public boolean attemptAiMove(GameAI ai) {
+		if (!hasMovesLeft()) return false;
+		
 		try {
 			// Get GameAI's difficulty
 			int diff = ai.getDifficulty();
 
 			// Find next best move and move
 			Move move = findBestMove(diff);
-
+			
 			place(boardLoc[move.row][move.col], next, ai.getSymbol());
-
+			
 			return true;
-
 		} catch (Exception e) {
 			return false;
 		}
@@ -170,11 +281,17 @@ public class Game {
 	 * @return True if there is a space, otherwise false
 	 */
 	public boolean hasMovesLeft() {
+		// X/O Win: If X/O has won the game already, no more moves left
+		if (evaluate() != 0) return false;
+		
+		// Ongoing: If no one has won the game, check board empty cells
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
 				if (board[i][j].isEmpty()) return true;
 			}
 		}
+		
+		// Draw: If no empty cells
 		return false;
 	}
 
@@ -231,7 +348,7 @@ public class Game {
 	 * @param isMax Maximize the score or not
 	 * @return Calculated score
 	 */
-	public int minimax(int depth, boolean isMax) {
+	private int minimax(int depth, boolean isMax) {
 		int score = evaluate();
 
 		if (score == 10 || score == -10)
@@ -281,7 +398,7 @@ public class Game {
 	 * 
 	 * @return Score evaluated
 	 */
-	public int evaluate() {
+	private int evaluate() {
 
 		// Check horizontal
 		for (int row = 0; row < height; row++) {
@@ -380,6 +497,8 @@ public class Game {
 	public void setId(String id) {
 		this.id = id;
 	}
+	
+	
 
 	public int getDifficulty() {
 		return difficulty;
@@ -387,84 +506,126 @@ public class Game {
 	public void setDifficulty(int difficulty) {
 		this.difficulty = difficulty;
 	}
-
+	
+	
+	
 	public GameParticipant getPlayer1() {
 		return player1;
 	}
 	public void setPlayer1(GameParticipant player1) {
 		this.player1 = player1;
 	}
-
+	
+	
+	
 	public GameParticipant getPlayer2() {
 		return player2;
 	}
 	public void setPlayer2(GameParticipant player2) {
 		this.player2 = player2;
 	}
-
+	
+	
+	
 	public int getWin() {
 		return win;
 	}
 	public void setWin(int win) {
 		this.win = win;
 	}
-
+	
+	
+	
 	public int getTime() {
 		return time;
 	}
 	public void setTime(int time) {
 		this.time = time;
 	}
-
+	
+	
+	
 	public long getExpire() {
 		return expire;
 	}
 	public void setExpire(long expire) {
 		this.expire = expire;
 	}
-
+	
+	
+	
+	public GameCommand getGameCommand() {
+		return cmd;
+	}
+	public void setGameCommand(GameCommand cmd) {
+		this.cmd = cmd;
+	}
+	
+	
+	
 	public Location getTop() {
 		return top;
 	}
 	public void setTop(Location top) {
 		this.top = top;
 	}
-
+	
+	
+	
 	public Location getBottom() {
 		return btm;
 	}
 	public void setBottom(Location btm) {
 		this.btm = btm;
 	}
-
+	
+	
+	
 	public int getWidth() {
 		return width;
 	}
 	public void setWidth(int width) {
 		this.width = width;
 	}
-
+	
+	
+	
 	public int getHeight() {
 		return height;
 	}
 	public void setHeight(int height) {
 		this.height = height;
 	}
-
+	
+	
+	
+	public BlockFace getFacing() {
+		return facing;
+	}
+	public void setFacing(BlockFace facing) {
+		this.facing = facing;
+	}
+	
+	
+	
 	public CellState getNext() {
 		return next;
 	}
 	public void setNext(CellState next) {
 		this.next = next;
 	}
-
+	
+	
+	
 	public long getLastUpdate() {
 		return lastUpdate;
 	}
 	public void setLastUpdate(long lastUpdate) {
 		this.lastUpdate = lastUpdate;
 	}
-
+	
+	
+	
 	// Get winner of the game
 	public GameParticipant getWinner() {
 		return winner;
@@ -472,7 +633,9 @@ public class Game {
 	public void setWinner(GameParticipant winner) {
 		this.winner = winner;
 	}
-
+	
+	
+	
 	// Symbol represent Player1 & Player2
 	public String getSelf() {
 		return self;
@@ -480,6 +643,9 @@ public class Game {
 	public void setSelf(String self) {
 		this.self = self;
 	}
+	
+	
+	
 	public String getOpponent() {
 		return opponent;
 	}

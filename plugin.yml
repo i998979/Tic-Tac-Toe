@@ -3,6 +3,7 @@ version: 1.0.0
 name: MapTacToe
 author: i998979
 description: Classic Tic Tac Toe game, but with maps & buttons
+softdepend: [BKCommonLib]
 api-version: 1.13
 
 commands:

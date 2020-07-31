@@ -1,5 +1,6 @@
 package to.epac.factorycraft.maptactoe.handlers;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -62,8 +63,18 @@ public class CellPickHandler implements Listener {
 					game.place(loc, CellState.X, gp.getSymbol());
 					game.swap();
 					
-					if (game.getPlayer2() instanceof GameAI)
-						game.attemptAiMove((GameAI) game.getPlayer2());
+					if (game.getPlayer2() instanceof GameAI) {
+						Game g = game;
+						Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
+							
+							@Override
+							public void run() {
+								g.attemptAiMove((GameAI) g.getPlayer2());
+								if (!g.check())
+									g.swap();
+							}
+						}, ((GameAI) game.getPlayer2()).getDelay());
+					}
 				}
 				else
 					player.sendMessage("¡±cThis is not your turn!");
@@ -82,8 +93,17 @@ public class CellPickHandler implements Listener {
 					game.place(loc, CellState.O, gp.getSymbol());
 					game.swap();
 					
-					if (game.getPlayer2() instanceof GameAI)
-						game.attemptAiMove((GameAI) game.getPlayer1());
+					if (game.getPlayer1() instanceof GameAI) {
+						Game g = game;
+						Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
+							@Override
+							public void run() {
+								g.attemptAiMove((GameAI) g.getPlayer1());
+								if (!g.check())
+									g.swap();
+							}
+						}, ((GameAI) game.getPlayer1()).getDelay());
+					}
 				}
 				else
 					player.sendMessage("¡±cThis is not your turn!");
@@ -91,9 +111,6 @@ public class CellPickHandler implements Listener {
 			else {
 				player.sendMessage("¡±cYou are not participant of this game. Find another one.");
 			}
-		}
-		else {
-			player.sendMessage("¡±cYou are not participant of this game. Find another one.");
 		}
 	}
 }

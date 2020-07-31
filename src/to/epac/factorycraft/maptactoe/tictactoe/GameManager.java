@@ -1,9 +1,14 @@
 package to.epac.factorycraft.maptactoe.tictactoe;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.Directional;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import to.epac.factorycraft.maptactoe.MapTacToe;
@@ -43,12 +48,13 @@ public class GameManager {
             		// AI, if exist, check start first or not
             		String symbol = conf.getString("MapTacToe." + id + ".Participants.AI.Symbol");
             		int diff = conf.getInt("MapTacToe." + id + ".Participants.AI.Difficulty");
+            		int delay = conf.getInt("MapTacToe." + id + ".Participants.AI.Delay");
             		boolean startFirst = conf.getBoolean("MapTacToe." + id + ".Participants.AI.StartFirst");
             		
             		if (startFirst)
-            			p1 = new GameAI(symbol, diff, startFirst);
+            			p1 = new GameAI(symbol, diff, delay, startFirst);
             		else
-            			p2 = new GameAI(symbol, diff, startFirst);
+            			p2 = new GameAI(symbol, diff, delay, startFirst);
             	}
             	else {
             		
@@ -71,16 +77,29 @@ public class GameManager {
             	
             	int width = conf.getInt("MapTacToe." + id + ".Settings.Width");
             	int height = conf.getInt("MapTacToe." + id + ".Settings.Height");
+            	BlockFace facing = BlockFace.valueOf(conf.getString("MapTacToe." + id + ".Settings.Facing"));
             	int win = conf.getInt("MapTacToe." + id + ".Settings.Win");
             	int time = conf.getInt("MapTacToe." + id + ".Settings.Time");
             	int expire = conf.getInt("MapTacToe." + id + ".Settings.Expire");
+            	
+            	List<String> winAI = conf.getStringList("MapTacToe." + id + ".Commands.Win.AI");
+            	List<String> winPlayer = conf.getStringList("MapTacToe." + id + ".Commands.Win.Player");
+            	
+            	List<String> loseAI = conf.getStringList("MapTacToe." + id + ".Commands.Lose.AI");
+            	List<String> losePlayer = conf.getStringList("MapTacToe." + id + ".Commands.Lose.Player");
+            	
+            	List<String> drawAI = conf.getStringList("MapTacToe." + id + ".Commands.Draw.AI");
+            	List<String> drawPlayer = conf.getStringList("MapTacToe." + id + ".Commands.Draw.Player");
+            	
+            	GameCommand cmd = new GameCommand(winAI, winPlayer, loseAI, losePlayer, drawAI, drawPlayer);
+            	
             	
             	Location top = conf.getLocation("MapTacToe." + id + ".Locations.Top");
             	Location btm = conf.getLocation("MapTacToe." + id + ".Locations.Bottom");
             	
             	// TODO - Load incomplete game's data in world
             	
-            	Game game = new Game(id, p1, p2, win, time, expire, top, btm, width, height);
+            	Game game = new Game(id, p1, p2, win, time, expire, cmd, top, btm, width, height, facing);
             	games.add(game);
             	
             } catch (Exception e) {
@@ -102,14 +121,31 @@ public class GameManager {
 	 * Initialize game board, if playerA is GameAI, means AI has the first move, then place X for AI
 	 */
 	public void initialize() {
-		plugin.getLogger().info("Initializing game boards...");
+		plugin.getLogger().info("Initializing games...");
 		
 		for (Game game : plugin.getGameManager().getGames()) {
+			
+			initBoard(game);
 			
 			// If AI has the first priority to move
 			if (game.getPlayer1() instanceof GameAI) {
 				game.attemptAiMove((GameAI) game.getPlayer1());
 				game.swap();
+			}
+		}
+	}
+	
+	public void initBoard(Game game) {
+		for (int i = 0; i < game.getHeight(); i++) {
+			for (int j = 0; j < game.getWidth(); j++) {
+				
+				Block button = game.boardLoc[i][j].getBlock();
+				button.setType(Material.STONE_BUTTON);
+				
+				Directional data = (Directional) button.getBlockData();
+				data.setFacing(game.getFacing());
+				
+				button.setBlockData(data);
 			}
 		}
 	}
