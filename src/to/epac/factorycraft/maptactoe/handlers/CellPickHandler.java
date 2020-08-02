@@ -54,21 +54,22 @@ public class CellPickHandler implements Listener {
 
 		event.setCancelled(true);
 		
+		if (!game.isMovesLeft()) return;
+		
 		
 
 		// Set game player's uuid for new players
-		if (game.getPlayer1() instanceof GamePlayer) {
+		if (game.getPlayer1() instanceof GamePlayer &&
+				((GamePlayer) game.getPlayer1()).getUniqueId() == null) {
+			
 			GamePlayer p1 = (GamePlayer) game.getPlayer1();
-
-			if (p1.getUniqueId() == null) {
-				p1.setUUID(uuid);
-			}
-		} else if (game.getPlayer2() instanceof GamePlayer) {
+				p1.setUniqueId(uuid);
+		}
+		else if (game.getPlayer2() instanceof GamePlayer &&
+				((GamePlayer) game.getPlayer2()).getUniqueId() == null) {
+			
 			GamePlayer p2 = (GamePlayer) game.getPlayer2();
-
-			if (p2.getUniqueId() == null) {
-				p2.setUUID(uuid);
-			}
+			p2.setUniqueId(uuid);
 		}
 		
 		
@@ -82,7 +83,6 @@ public class CellPickHandler implements Listener {
 				game.place(loc, CellState.X, gp.getSymbol());
 
 				if (game.isMovesLeft()) {
-					game.swap();
 
 					// If Player2 is AI
 					if (game.getPlayer2() instanceof GameAI) {
@@ -93,6 +93,8 @@ public class CellPickHandler implements Listener {
 						Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
 							@Override
 							public void run() {
+								g.swap();
+								
 								//  Attempt to place
 								g.attemptAiMove(ai.getDifficulty(), CellState.O, ai.getSymbol());
 
@@ -131,6 +133,9 @@ public class CellPickHandler implements Listener {
 					}, game.getReset());
 				}
 			}
+			else {
+				player.sendMessage("¡±cThis is not your turn!");
+			}
 		}
 		else if (game.getPlayer2() instanceof GamePlayer &&
 			((GamePlayer) game.getPlayer2()).getUniqueId().equals(uuid)) {
@@ -141,7 +146,6 @@ public class CellPickHandler implements Listener {
 				game.place(loc, CellState.O, gp.getSymbol());
 
 				if (game.isMovesLeft()) {
-					game.swap();
 
 					// If Player1 is AI
 					if (game.getPlayer1() instanceof GameAI) {
@@ -152,6 +156,8 @@ public class CellPickHandler implements Listener {
 						Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
 							@Override
 							public void run() {
+								g.swap();
+								
 								//  Attempt to place
 								g.attemptAiMove(ai.getDifficulty(), CellState.X, ai.getSymbol());
 
@@ -190,6 +196,12 @@ public class CellPickHandler implements Listener {
 					}, game.getReset());
 				}
 			}
+			else {
+				player.sendMessage("¡±cThis is not your turn!");
+			}
+		}
+		else {
+			player.sendMessage("¡±cYou are not particiapant of this game. Find a new one!");
 		}
 	}
 }

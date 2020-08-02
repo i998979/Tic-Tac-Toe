@@ -46,7 +46,7 @@ public class GameManager {
             	GameParticipant p1 = null;
             	GameParticipant p2 = null;
             	
-            	if (conf.contains("MapTacToe." + id + ".Participants.AI")) {
+            	if (conf.isSet("MapTacToe." + id + ".Participants.AI")) {
             		// AI, if exist, check start first or not
             		
             		String symbol = conf.getString("MapTacToe." + id + ".Participants.AI.Symbol", "circle.png");

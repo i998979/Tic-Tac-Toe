@@ -49,7 +49,7 @@ public class MapClickHandler implements Listener {
 	}
 	
 	@EventHandler
-	public void onHangingBreak(EntityDamageEvent event) {
+	public void onFrameDamage(EntityDamageEvent event) {
 		Entity entity = event.getEntity();
 		Location loc = entity.getLocation();
 		

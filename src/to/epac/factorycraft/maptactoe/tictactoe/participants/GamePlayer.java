@@ -31,10 +31,7 @@ public class GamePlayer implements GameParticipant {
 	public UUID getUniqueId() {
 		return uuid;
 	}
-	public void setUuidFromString(String uuid) {
-		this.uuid = UUID.fromString(uuid);
-	}
-	public void setUUID(UUID uuid) {
+	public void setUniqueId(UUID uuid) {
 		this.uuid = uuid;
 	}
 	

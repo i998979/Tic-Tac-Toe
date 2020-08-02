@@ -167,6 +167,11 @@ public class Game {
 		ItemUtil.getMetaTag(item).putValue("State", symbol);
 
 		ItemFrame frame = loc.getWorld().spawn(loc, ItemFrame.class);
+		/*frame.setFacingDirection(facing, true);
+		
+		Bukkit.getScheduler().runTaskLater(plugin, runnable -> {
+			frame.setItem(item);
+		}, 5);*/
 		frame.setItem(item);
 	}
 	
@@ -273,9 +278,9 @@ public class Game {
 
 	public void reset() {
 		if (player1 instanceof GamePlayer)
-			((GamePlayer) player1).setUUID(null);
+			((GamePlayer) player1).setUniqueId(null);
 		if (player2 instanceof GamePlayer)
-			((GamePlayer) player2).setUUID(null);
+			((GamePlayer) player2).setUniqueId(null);
 		
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < height; j++) {
