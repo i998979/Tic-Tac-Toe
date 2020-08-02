@@ -19,6 +19,9 @@ public class GamePlayer implements GameParticipant {
 		this.symbol = symbol;
 		this.uuid = uuid;
 	}
+	public GamePlayer(String symbol) {
+		this.symbol = symbol;
+	}
 	
 	
 	
@@ -27,6 +30,12 @@ public class GamePlayer implements GameParticipant {
 	
 	public UUID getUniqueId() {
 		return uuid;
+	}
+	public void setUuidFromString(String uuid) {
+		this.uuid = UUID.fromString(uuid);
+	}
+	public void setUUID(UUID uuid) {
+		this.uuid = uuid;
 	}
 	
 	public OfflinePlayer getPlayer() {
@@ -38,5 +47,9 @@ public class GamePlayer implements GameParticipant {
 	@Override
 	public String getSymbol() {
 		return symbol;
+	}
+	@Override
+	public void setSymbol(String symbol) {
+		this.symbol = symbol;
 	}
 }

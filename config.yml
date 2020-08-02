@@ -8,11 +8,9 @@ MapTacToe:
         StartFirst: true
       PlayerA:
         Symbol: "cross.png"
-        UUID: "991d961c-b6b4-4d49-88e6-01788cf445dc"
       # Either AI or PlayerB, if both are enabled, use AI
       # PlayerB:
         # Symbol: "circle.png"
-        # UUID: 991d961c-b6b4-4d49-88e6-01788cf445dc
     Settings:
       Width: 3
       Height: 3
@@ -20,6 +18,7 @@ MapTacToe:
       Win: 3
       Time: 100
       Expire: 2400
+      Reset: 100
     Commands:
       Win:
         AI:

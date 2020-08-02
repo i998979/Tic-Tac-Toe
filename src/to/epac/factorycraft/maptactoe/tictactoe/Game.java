@@ -20,6 +20,8 @@ import to.epac.factorycraft.maptactoe.tictactoe.participants.GamePlayer;
 
 public class Game {
 	
+	private MapTacToe plugin = MapTacToe.inst();
+	
 	public class Move {
 		int row;
 		int col;
@@ -41,7 +43,8 @@ public class Game {
 
 	private int win;
 	private int time;
-	private long expire;
+	private int expire;
+	private int reset;
 	
 	private GameCommand cmd;
 
@@ -61,23 +64,22 @@ public class Game {
 	private CellState next = CellState.X;
 
 	private long lastUpdate;
-
-	private GameParticipant winner;
 	
 	private String self = "O";
 	private String opponent = "X";
 
 
 
-	public Game(String id, GameParticipant player1, GameParticipant player2, int win, int time, long expire,
-			GameCommand cmd, Location top, Location btm, int width, int height, BlockFace facing) {
-
+	public Game(String id, GameParticipant player1, GameParticipant player2, int win, int time, int expire,
+			int reset, GameCommand cmd, Location top, Location btm, int width, int height, BlockFace facing) {
+		
 		this.id = id;
 		this.player1 = player1;
 		this.player2 = player2;
 		this.win = win;
 		this.time = time;
 		this.expire = expire;
+		this.reset = reset;
 		this.cmd = cmd;
 		this.top = top;
 		this.btm = btm;
@@ -87,8 +89,8 @@ public class Game {
 
 		this.board = new String[width][height];
 		// Initialize board
-		for (int i = 0; i < width; i++) {
-			for (int j = 0; j < height; j++) {
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
 				board[i][j] = "";
 			}
 		}
@@ -112,133 +114,26 @@ public class Game {
 			}
 		}
 	}
-
-	/** Swap which symbol should be placed in the current turn */
-	public void swap() {
-		this.next = (this.next == CellState.X ? CellState.O : CellState.X);
-	}
 	
-	/**
-	 * Check the game has ended or not, if yes, execute the commands
-	 * 
-	 * @return The game has ended or not
-	 */
-	public boolean check() {
-		
-		// If there are no moves left, either someone won, or the board is full
-		if (!hasMovesLeft()) {
-			int score = evaluate();
-			
-			List<String> gcmd = new ArrayList<>();
-			
-			
-			
-			String winner = "";
-			String loser = "";
-			String opponent = "";
-			String p1 = "";
-			String p2 = "";
-			
-			// X win
-			if (score == -10) {
-				
-				if (player1 instanceof GameAI) {
-					winner = "AI";
-					gcmd.addAll(cmd.winAI);
-				} else if (player1 instanceof GamePlayer) {
-					winner = ((GamePlayer) player1).getPlayer().getName();
-					gcmd.addAll(cmd.winPlayer);
-				}
-				
-				
-				if (player2 instanceof GameAI) {
-					loser = "AI";
-					gcmd.addAll(cmd.loseAI);
-				} else if (player2 instanceof GamePlayer) {
-					loser = ((GamePlayer) player2).getPlayer().getName();
-					gcmd.addAll(cmd.losePlayer);
-				}
-			}
-			// O win
-			else if (score == 10) {
-				if (player1 instanceof GameAI) {
-					loser = "AI";
-					gcmd.addAll(cmd.loseAI);
-				} else if (player1 instanceof GamePlayer) {
-					loser = ((GamePlayer) player1).getPlayer().getName();
-					gcmd.addAll(cmd.losePlayer);
-				}
-				
-				
-				if (player2 instanceof GameAI) {
-					winner = "AI";
-					gcmd.addAll(cmd.winAI);
-				} else if (player2 instanceof GamePlayer) {
-					winner = ((GamePlayer) player2).getPlayer().getName();
-					gcmd.addAll(cmd.winPlayer);
-				}
-			}
-			// Draw
-			else {
-				if (player1 instanceof GamePlayer) {
-					p1 = ((GamePlayer) player1).getPlayer().getName();
-					
-					// Player vs Player
-					if (player2 instanceof GamePlayer) {
-						p2 = ((GamePlayer) player2).getPlayer().getName();
-						gcmd.addAll(cmd.drawPlayer);
-					}
-					// Player vs AI
-					else if (player2 instanceof GameAI) {
-						opponent = ((GamePlayer) player1).getPlayer().getName();
-						gcmd.addAll(cmd.drawAI);
-					}
-				}
-				if (player1 instanceof GameAI) {
-					p1 = "AI";
-					
-					// AI vs Player
-					if (player2 instanceof GamePlayer) {
-						opponent = ((GamePlayer) player2).getPlayer().getName();
-						gcmd.addAll(cmd.drawAI);
-					}
-				}
-			}
-			
-			for (String cmd : gcmd) {
-				cmd = cmd.replace("%id%", id)
-						.replace("%winner%", winner)
-						.replace("%loser%", loser)
-						.replace("%opponent%", opponent)
-						.replace("%p1%", p1)
-						.replace("%p2%", p2);
-				
-				cmd = ChatColor.translateAlternateColorCodes('&', cmd);
-				
-				Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
-			}
-			
-			return true;
-		}
-		return false;
-	}
-
+	
+	
+	
+	
+	
 	/**
 	 * Find the next best move for AI
 	 * 
 	 * @return true if there is a move, otherwise false
 	 */
-	public boolean attemptAiMove(GameAI ai) {
-		if (!hasMovesLeft()) return false;
+	public boolean attemptAiMove(int difficulty, CellState state, String symbol) {
+		// If there are no moves left, can't place
+		if (!isMovesLeft()) return false;
 		
 		try {
-			// Get GameAI's difficulty
-			int diff = ai.getDifficulty();
-
 			// Find next best move and move
-			Move move = findBestMove(diff);
+			Move move = findBestMove(difficulty);
 			
-			place(boardLoc[move.row][move.col], next, ai.getSymbol());
+			place(boardLoc[move.row][move.col], state, symbol);
 			
 			return true;
 		} catch (Exception e) {
@@ -256,12 +151,12 @@ public class Game {
 	public void place(Location loc, CellState state, String symbol) {
 
 		// Place symbols into cell that match specified location
-		found: for (int i = 0; i < height; i++) {
+		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
 
 				if (boardLoc[i][j].equals(loc)) {
 					board[i][j] = state.toString();
-					break found;
+					break;
 				}
 			}
 		}
@@ -274,13 +169,148 @@ public class Game {
 		ItemFrame frame = loc.getWorld().spawn(loc, ItemFrame.class);
 		frame.setItem(item);
 	}
+	
+	/** Swap which symbol should be placed in the current turn */
+	public void swap() {
+		this.next = (this.next == CellState.X ? CellState.O : CellState.X);
+	}
+	
+	
+	
+	/**
+	 * Check if there are moves left, if no, then get board scores, determine win/lose/draw, then run commands
+	 */
+	public void runCommands() {
+		List<String> gcmd = new ArrayList<>();
+		
+		int score = evaluate();
+		
+		String winner = "";
+		String loser = "";
+		String opponent = "";
+		String p1 = "";
+		String p2 = "";
+		
+		// X win
+		if (score == -10) {
+			
+			if (player1 instanceof GameAI) {
+				winner = "AI";
+				gcmd = cmd.winAI;
+			} else if (player1 instanceof GamePlayer) {
+				winner = ((GamePlayer) player1).getPlayer().getName();
+				gcmd = cmd.winPlayer;
+			}
+			
+			
+			if (player2 instanceof GameAI) {
+				loser = "AI";
+				gcmd = cmd.loseAI;
+			} else if (player2 instanceof GamePlayer) {
+				loser = ((GamePlayer) player2).getPlayer().getName();
+				gcmd = cmd.losePlayer;
+			}
+		}
+		// O win
+		else if (score == 10) {
+			if (player1 instanceof GameAI) {
+				loser = "AI";
+				gcmd = cmd.loseAI;
+			} else if (player1 instanceof GamePlayer) {
+				loser = ((GamePlayer) player1).getPlayer().getName();
+				gcmd = cmd.losePlayer;
+			}
+			
+			
+			if (player2 instanceof GameAI) {
+				winner = "AI";
+				gcmd = cmd.winAI;
+			} else if (player2 instanceof GamePlayer) {
+				winner = ((GamePlayer) player2).getPlayer().getName();
+				gcmd = cmd.winPlayer;
+			}
+		}
+		// Draw
+		else {
+			if (player1 instanceof GamePlayer) {
+				p1 = ((GamePlayer) player1).getPlayer().getName();
+				
+				// Player vs Player
+				if (player2 instanceof GamePlayer) {
+					p2 = ((GamePlayer) player2).getPlayer().getName();
+					gcmd = cmd.drawPlayer;
+				}
+				// Player vs AI
+				else if (player2 instanceof GameAI) {
+					opponent = ((GamePlayer) player1).getPlayer().getName();
+					gcmd = cmd.drawAI;
+				}
+			}
+			if (player1 instanceof GameAI) {
+				p1 = "AI";
+				
+				// AI vs Player
+				if (player2 instanceof GamePlayer) {
+					opponent = ((GamePlayer) player2).getPlayer().getName();
+					gcmd = cmd.drawAI;
+				}
+			}
+		}
+		
+		for (String cmd : gcmd) {
+			cmd = cmd.replace("%id%", id)
+					.replace("%winner%", winner)
+					.replace("%loser%", loser)
+					.replace("%opponent%", opponent)
+					.replace("%p1%", p1)
+					.replace("%p2%", p2);
+			
+			cmd = ChatColor.translateAlternateColorCodes('&', cmd);
+			
+			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
+		}
+	}
 
+	public void reset() {
+		if (player1 instanceof GamePlayer)
+			((GamePlayer) player1).setUUID(null);
+		if (player2 instanceof GamePlayer)
+			((GamePlayer) player2).setUUID(null);
+		
+		for (int i = 0; i < width; i++) {
+			for (int j = 0; j < height; j++) {
+				board[i][j] = "";
+			}
+		}
+		
+		next = CellState.X;
+		
+		plugin.getGameManager().initialize(this);
+	}
+	
+	
+	
+	/**
+	 * Check whether the board is empty
+	 * 
+	 * @return True if the board is empty, otherwise false
+	 */
+	public boolean isBoardEmpty() {
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+				if (!board[i][j].isEmpty()) return false;
+			}
+		}
+		
+		return true;
+	}
+	
 	/**
 	 * Check whether there is a space to place move
 	 * 
 	 * @return True if there is a space, otherwise false
 	 */
-	public boolean hasMovesLeft() {
+	public boolean isMovesLeft() {
 		// X/O Win: If X/O has won the game already, no more moves left
 		if (evaluate() != 0) return false;
 		
@@ -294,7 +324,9 @@ public class Game {
 		// Draw: If no empty cells
 		return false;
 	}
-
+	
+	
+	
 	/**
 	 * Find the best row&col to place
 	 * 
@@ -354,7 +386,7 @@ public class Game {
 		if (score == 10 || score == -10)
 			return score;
 
-		if (!hasMovesLeft())
+		if (!isMovesLeft())
 			return 0;
 
 		if (depth == 0)
@@ -545,11 +577,20 @@ public class Game {
 	
 	
 	
-	public long getExpire() {
+	public int getExpire() {
 		return expire;
 	}
-	public void setExpire(long expire) {
+	public void setExpire(int expire) {
 		this.expire = expire;
+	}
+	
+	
+	
+	public int getReset() {
+		return reset;
+	}
+	public void setReset(int reset) {
+		this.reset = reset;
 	}
 	
 	
@@ -622,16 +663,6 @@ public class Game {
 	}
 	public void setLastUpdate(long lastUpdate) {
 		this.lastUpdate = lastUpdate;
-	}
-	
-	
-	
-	// Get winner of the game
-	public GameParticipant getWinner() {
-		return winner;
-	}
-	public void setWinner(GameParticipant winner) {
-		this.winner = winner;
 	}
 	
 	

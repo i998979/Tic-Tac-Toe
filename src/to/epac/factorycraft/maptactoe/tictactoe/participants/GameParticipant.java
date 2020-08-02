@@ -4,4 +4,6 @@ public interface GameParticipant {
 	
 	public String getSymbol();
 	
+	public void setSymbol(String symbol);
+	
 }

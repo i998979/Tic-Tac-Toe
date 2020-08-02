@@ -1,5 +1,7 @@
 package to.epac.factorycraft.maptactoe.handlers;
 
+import java.util.UUID;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -20,96 +22,173 @@ import to.epac.factorycraft.maptactoe.utils.Utils;
 public class CellPickHandler implements Listener {
 	
 	private MapTacToe plugin = MapTacToe.inst();
-	
+
 	@EventHandler
-	public void onClick(PlayerInteractEvent event) {
-		
+	public void onPick(PlayerInteractEvent event) {
+
 		Player player = event.getPlayer();
+		UUID uuid = player.getUniqueId();
 		Action action = event.getAction();
-		
+
 		if (action != Action.RIGHT_CLICK_BLOCK) return;
-		
+
 		Block block = event.getClickedBlock();
 		Location loc = block.getLocation();
-		
-		if(block.getType() != Material.STONE_BUTTON) return;
-		
-		
-		
+
+		if (block.getType() != Material.STONE_BUTTON) return;
+
 		Game game = null;
-		
+
 		// Loop all games
-		for (Game g : plugin.getGameManager().getGames()) {
+		for (Game g: plugin.getGameManager().getGames()) {
 			// Check if clicked button is in looping game's arena
 			if (Utils.locContains(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), g.getBottom(), g.getTop())) {
 				game = g;
 				break;
 			}
 		}
-		
+
 		if (game == null) return;
-		
+
 		// Now we have the game of the button clicked
+
+		event.setCancelled(true);
 		
 		
-		
+
+		// Set game player's uuid for new players
 		if (game.getPlayer1() instanceof GamePlayer) {
+			GamePlayer p1 = (GamePlayer) game.getPlayer1();
+
+			if (p1.getUniqueId() == null) {
+				p1.setUUID(uuid);
+			}
+		} else if (game.getPlayer2() instanceof GamePlayer) {
+			GamePlayer p2 = (GamePlayer) game.getPlayer2();
+
+			if (p2.getUniqueId() == null) {
+				p2.setUUID(uuid);
+			}
+		}
+		
+		
+
+		if (game.getPlayer1() instanceof GamePlayer &&
+			((GamePlayer) game.getPlayer1()).getUniqueId().equals(uuid)) {
+			
 			GamePlayer gp = (GamePlayer) game.getPlayer1();
-			
-			event.setCancelled(true);
-			
-			if (gp.getUniqueId().equals(player.getUniqueId())) {
-				if (game.getNext() == CellState.X) {
-					game.place(loc, CellState.X, gp.getSymbol());
+
+			if (game.getNext() == CellState.X) {
+				game.place(loc, CellState.X, gp.getSymbol());
+
+				if (game.isMovesLeft()) {
 					game.swap();
-					
+
+					// If Player2 is AI
 					if (game.getPlayer2() instanceof GameAI) {
 						Game g = game;
+						GameAI ai = (GameAI) game.getPlayer2();
+
+						// Delay, then attempt to place
 						Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
-							
 							@Override
 							public void run() {
-								g.attemptAiMove((GameAI) g.getPlayer2());
-								if (!g.check())
+								//  Attempt to place
+								g.attemptAiMove(ai.getDifficulty(), CellState.O, ai.getSymbol());
+
+								// If there are moves left
+								if (g.isMovesLeft())
+									// Swap to Player1
 									g.swap();
+								// If no moves left
+								else {
+									// Run end game commands
+									g.runCommands();
+
+									// Delay, then reset game
+									Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
+										@Override
+										public void run() {
+											g.reset();
+										}
+									}, g.getReset());
+								}
 							}
 						}, ((GameAI) game.getPlayer2()).getDelay());
 					}
 				}
-				else
-					player.sendMessage("¡±cThis is not your turn!");
-			}
-			else {
-				player.sendMessage("¡±cYou are not participant of this game. Find another one.");
+				else {
+					// Run end game commands
+					game.runCommands();
+
+					// Delay, then reset game
+					Game g = game;
+					Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
+						@Override
+						public void run() {
+							g.reset();
+						}
+					}, game.getReset());
+				}
 			}
 		}
-		else if (game.getPlayer2() instanceof GamePlayer) {
+		else if (game.getPlayer2() instanceof GamePlayer &&
+			((GamePlayer) game.getPlayer2()).getUniqueId().equals(uuid)) {
+			
 			GamePlayer gp = (GamePlayer) game.getPlayer2();
 
-			event.setCancelled(true);
-			
-			if (gp.getUniqueId().equals(player.getUniqueId())) {
-				if (game.getNext() == CellState.O) {
-					game.place(loc, CellState.O, gp.getSymbol());
+			if (game.getNext() == CellState.O) {
+				game.place(loc, CellState.O, gp.getSymbol());
+
+				if (game.isMovesLeft()) {
 					game.swap();
-					
+
+					// If Player1 is AI
 					if (game.getPlayer1() instanceof GameAI) {
 						Game g = game;
+						GameAI ai = (GameAI) game.getPlayer1();
+
+						// Delay, then attempt to place
 						Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
 							@Override
 							public void run() {
-								g.attemptAiMove((GameAI) g.getPlayer1());
-								if (!g.check())
+								//  Attempt to place
+								g.attemptAiMove(ai.getDifficulty(), CellState.X, ai.getSymbol());
+
+								// If there are moves left
+								if (g.isMovesLeft())
+									// Swap to Player2
 									g.swap();
+								// If no moves left
+								else {
+									// Run end game commands
+									g.runCommands();
+
+									// Delay, then reset game
+									Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
+										@Override
+										public void run() {
+											g.reset();
+										}
+									}, g.getReset());
+								}
 							}
 						}, ((GameAI) game.getPlayer1()).getDelay());
 					}
 				}
-				else
-					player.sendMessage("¡±cThis is not your turn!");
-			}
-			else {
-				player.sendMessage("¡±cYou are not participant of this game. Find another one.");
+				else {
+					// Run end game commands
+					game.runCommands();
+
+					// Delay, then reset game
+					Game g = game;
+					Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
+						@Override
+						public void run() {
+							g.reset();
+						}
+					}, game.getReset());
+				}
 			}
 		}
 	}
