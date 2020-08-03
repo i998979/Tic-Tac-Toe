@@ -98,19 +98,33 @@ public class Game {
 		this.boardLoc = new Location[width][height];
 		// Calculate relative locations
 		for (int i = 0; i < height; i++) {
-			//  addY = (TopY - BtmY + 1) / height * row
-			int addY = (top.getBlockY() - btm.getBlockY() + 1) / height * i;
+			//  addY = (TopY - BtmY + 2) / height * row
+			int addY = (top.getBlockY() - btm.getBlockY() + 2) / height * i;
 
 			for (int j = 0; j < width; j++) {
-				//  addX = (Largest X - Smallest X + 1) / width * col
-				int addX = (Math.max(top.getBlockX(), btm.getBlockX()) - Math.min(top.getBlockX(), btm.getBlockX()) + 1)
+				//  addX = (Largest X - Smallest X + 2) / width * col
+				int addX = (Math.max(top.getBlockX(), btm.getBlockX()) - Math.min(top.getBlockX(), btm.getBlockX()) + 2)
 						/ width * j;
 
-				//  addZ = (Largest Z - Smallest Z + 1) / width * col
-				int addZ = (Math.max(top.getBlockZ(), btm.getBlockZ()) - Math.min(top.getBlockZ(), btm.getBlockZ()) + 1)
+				//  addZ = (Largest Z - Smallest Z + 2) / width * col
+				int addZ = (Math.max(top.getBlockZ(), btm.getBlockZ()) - Math.min(top.getBlockZ(), btm.getBlockZ()) + 2)
 						/ width * j;
-
-				boardLoc[i][j] = top.clone().subtract(addX, addY, addZ);
+				
+				Location loc = top.clone();
+				
+				loc.subtract(0, addY, 0);
+				
+				if (top.getBlockX() > btm.getBlockX())
+					loc.subtract(addX, 0, 0);
+				else
+					loc.add(addX, 0, 0);
+				
+				if (top.getBlockZ() > btm.getBlockZ())
+					loc.subtract(0, 0, addZ);
+				else
+					loc.add(0, 0, addZ);
+				
+				boardLoc[i][j] = loc;
 			}
 		}
 	}
