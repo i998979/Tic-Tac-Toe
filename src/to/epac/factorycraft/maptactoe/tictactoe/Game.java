@@ -87,7 +87,7 @@ public class Game {
 		this.height = height;
 		this.facing = facing;
 
-		this.board = new String[width][height];
+		this.board = new String[height][width];
 		// Initialize board
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
@@ -95,7 +95,7 @@ public class Game {
 			}
 		}
 
-		this.boardLoc = new Location[width][height];
+		this.boardLoc = new Location[height][width];
 		// Calculate relative locations
 		for (int i = 0; i < height; i++) {
 			//  addY = (TopY - BtmY + 2) / height * row
@@ -296,8 +296,8 @@ public class Game {
 		if (player2 instanceof GamePlayer)
 			((GamePlayer) player2).setUniqueId(null);
 		
-		for (int i = 0; i < width; i++) {
-			for (int j = 0; j < height; j++) {
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
 				board[i][j] = "";
 			}
 		}

@@ -88,8 +88,7 @@ public class GameManager {
             	int expire = conf.getInt("MapTacToe." + id + ".Settings.Expire", 2400);
             	int reset = conf.getInt("MapTacToe." + id + ".Settings.Reset", 100);
             	
-            	List<String> winAI = conf
-            			.getStringList("MapTacToe." + id + ".Commands.Win.AI");
+            	List<String> winAI = conf.getStringList("MapTacToe." + id + ".Commands.Win.AI");
             	List<String> winPlayer = conf.getStringList("MapTacToe." + id + ".Commands.Win.Player");
             	
             	List<String> loseAI = conf.getStringList("MapTacToe." + id + ".Commands.Lose.AI");
