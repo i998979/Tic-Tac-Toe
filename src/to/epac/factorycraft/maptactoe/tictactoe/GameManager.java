@@ -13,6 +13,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Directional;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.ItemFrame;
 
 import to.epac.factorycraft.maptactoe.MapTacToe;
 import to.epac.factorycraft.maptactoe.tictactoe.participants.GameAI;
@@ -141,6 +142,9 @@ public class GameManager {
 			public void run() {
 				// If AI has the first priority to move
 				if (game.getPlayer1() instanceof GameAI) {
+					// Invert self and opponent symbol
+					game.setSelf("X");
+					game.setOpponent("O");
 					
 					GameAI ai = (GameAI) game.getPlayer1();
 					game.attemptAiMove(ai.getDifficulty(), CellState.X, ai.getSymbol());
@@ -155,13 +159,13 @@ public class GameManager {
 	 * @param game The game specified
 	 */
 	public void initBoard(Game game) {
-		
 		for (int i = 0; i < game.getHeight(); i++) {
 			for (int j = 0; j < game.getWidth(); j++) {
 				
 				Collection<Entity> entities = game.getTop().getWorld().getNearbyEntities(game.boardLoc[i][j], 1, 1, 1);
 				for (Entity entity : entities) {
-					entity.remove();
+					if (entity instanceof ItemFrame)
+						entity.remove();
 				}
 				
 				Block button = game.boardLoc[i][j].getBlock();

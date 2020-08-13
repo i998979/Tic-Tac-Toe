@@ -2,13 +2,16 @@ package to.epac.factorycraft.maptactoe.tictactoe;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.ItemFrame;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import com.bergerkiller.bukkit.common.utils.ItemUtil;
 
@@ -60,6 +63,8 @@ public class Game {
 
 	public String[][] board;
 	public Location[][] boardLoc;
+	
+	private BukkitRunnable countdown;
 
 	private CellState next = CellState.X;
 
@@ -127,6 +132,35 @@ public class Game {
 				boardLoc[i][j] = loc;
 			}
 		}
+		
+		// TODO
+		this.countdown = new BukkitRunnable() {
+			@Override
+			public void run() {
+				if (player1 instanceof GamePlayer) {
+					GamePlayer p1 = (GamePlayer) player1;
+					
+					if (p1.getUniqueId() == null) return;
+					
+					if (p1.getPlayer().isOnline()) {
+						((Player) p1.getPlayer()).sendMessage("¡±aTicTacToe board ¡±e" + id + " ¡±ahas reached maximum play time, resetting.");
+					}
+				}
+				if (player2 instanceof GamePlayer) {
+					GamePlayer p2 = (GamePlayer) player2;
+					
+					if (p2.getUniqueId() == null) return;
+					
+					if (p2.getPlayer().isOnline()) {
+						((Player) p2.getPlayer()).sendMessage("¡±aTicTacToe board ¡±e" + id + " ¡±ahas reached maximum play time, resetting.");
+					}
+				}
+				
+				runCommands(evaluate());
+				reset();
+			}
+		};
+		// countdown.runTaskLater(plugin, getExpire());
 	}
 	
 	
@@ -187,6 +221,8 @@ public class Game {
 			frame.setItem(item);
 		}, 5);*/
 		frame.setItem(item);
+		
+		lastUpdate = System.currentTimeMillis();
 	}
 	
 	/** Swap which symbol should be placed in the current turn */
@@ -199,10 +235,8 @@ public class Game {
 	/**
 	 * Check if there are moves left, if no, then get board scores, determine win/lose/draw, then run commands
 	 */
-	public void runCommands() {
+	public void runCommands(int score) {
 		List<String> gcmd = new ArrayList<>();
-		
-		int score = evaluate();
 		
 		String winner = "";
 		String loser = "";
@@ -212,6 +246,30 @@ public class Game {
 		
 		// X win
 		if (score == -10) {
+			
+			
+			
+		}
+		// O win
+		else if (score == 10) {
+			
+			
+			
+		}
+		// Draw
+		else {
+			
+			
+			
+		}
+		
+		
+		
+		
+		
+		
+		// X win
+		/*if (score == -10) {
 			
 			if (player1 instanceof GameAI) {
 				winner = "AI";
@@ -274,7 +332,7 @@ public class Game {
 					gcmd = cmd.drawAI;
 				}
 			}
-		}
+		}*/
 		
 		for (String cmd : gcmd) {
 			cmd = cmd.replace("%id%", id)
@@ -303,6 +361,9 @@ public class Game {
 		}
 		
 		next = CellState.X;
+		
+		self = "O";
+		opponent = "X";
 		
 		plugin.getGameManager().initialize(this);
 	}
@@ -349,24 +410,30 @@ public class Game {
 	/**
 	 * Find the best row&col to place
 	 * 
+	 * @param depth How deep the AI will predict
 	 * @return Best move
 	 */
-	public Move findBestMove(int diff) {
-		Move move = new Move(-1, -1, -1000);
-
-		if (height == 3 && width == 3) {
+	public Move findBestMove(int depth) {
+		Random rand = new Random();
+		
+		// If the board is empty, place randomly
+		if (isBoardEmpty())
+			return new Move(rand.nextInt(height), rand.nextInt(width), 0);
+		
+		// If 3x3 and middle is empty
+		/*if (height == 3 && width == 3) {
 			int m = (height - 1) / 2;
-
+			
 			if (board[m][m].isEmpty()) {
-				move.row = m;
-				move.col = m;
-				move.val = 10;
+				Move move = new Move(m, m, 10);
 
 				MapTacToe.inst().getLogger().info("(M) Next best move of " + id +
 						" is (" + move.row + ", " + move.col + ") with score " + move.val);
 				return move;
 			}
-		}
+		}*/
+		
+		List<Move> moves = new ArrayList<>();
 
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
@@ -374,17 +441,26 @@ public class Game {
 				if (board[i][j].isEmpty()) {
 
 					board[i][j] = self;
-					int moveVal = minimax(diff, false);
+					int moveVal = minimax(0, depth, false);
 					board[i][j] = "";
-
-					if (moveVal > move.val) {
-						move.row = i;
-						move.col = j;
-						move.val = moveVal;
+					
+					// If the move value is same as the list, add into list to roll this move
+					if (moves.isEmpty() || moveVal == moves.get(0).val)
+						moves.add(new Move(i, j, moveVal));
+					
+					// If the move value is bigger than the list, clear the list and add this move into list
+					else if (moveVal > moves.get(0).val) {
+						moves.clear();
+						
+						moves.add(new Move(i, j, moveVal));
 					}
 				}
 			}
 		}
+		
+		// Get a move randomly from the list
+		// Move move = moves.get(rand.nextInt(moves.size()));
+		Move move = moves.get(0);
 
 		MapTacToe.inst().getLogger().info("Next best move of " + id +
 				" is (" + move.row + ", " + move.col + ") with score " + move.val);
@@ -397,19 +473,23 @@ public class Game {
 	 * 
 	 * @param depth How many steps will assume
 	 * @param isMax Maximize the score or not
-	 * @return Calculated score
+	 * @return Maximized/minimized score
 	 */
-	private int minimax(int depth, boolean isMax) {
+	// TODO - Return score with depth
+	private int minimax(int depth, int depthMax, boolean isMax) {
 		int score = evaluate();
-
-		if (score == 10 || score == -10)
+		
+		if (score == 10)
+			return score;
+		
+		if (score == -10)
 			return score;
 
 		if (!isMovesLeft())
 			return 0;
-
-		if (depth == 0)
-			return 0;
+		
+		if (depth >= depthMax)
+			return score;
 
 		if (isMax) {
 			int best = -1000;
@@ -420,13 +500,14 @@ public class Game {
 					if (board[i][j].isEmpty()) {
 
 						board[i][j] = self;
-						best += Math.max(best, minimax(depth - 1, !isMax));
+						best = Math.max(best, minimax(depth + 1, depthMax, !isMax));
 						board[i][j] = "";
 					}
 				}
 			}
 			return best;
-		} else {
+		}
+		else {
 			int best = 1000;
 
 			for (int i = 0; i < height; i++) {
@@ -435,7 +516,7 @@ public class Game {
 					if (board[i][j].isEmpty()) {
 
 						board[i][j] = opponent;
-						best += Math.min(best, minimax(depth - 1, isMax));
+						best = Math.min(best, minimax(depth + 1, depthMax, !isMax));
 						board[i][j] = "";
 					}
 				}
@@ -447,101 +528,92 @@ public class Game {
 	/**
 	 * Evaluate the score of the moves
 	 * 
-	 * @return Score evaluated
+	 * @return Score evaluated, 10: self win, -10: opponent win, 0: no one wins
 	 */
-	private int evaluate() {
+	public int evaluate() {
+	    // Check horizontal
+	    for (int row = 0; row < height; row++) {
+	        int swin = 0;
+	        int owin = 0;
+	        
+	        for (int i = 0; i < width; i++) {
+	            if (board[row][i].equals(self)) {
+	                owin = 0;
+	                swin++;
+	            }
+	            if (board[row][i].equals(opponent)) {
+	                swin = 0;
+	                owin++;
+	            }
+	            if (swin == win) return 10;
+	            if (owin == win) return -10;
+	        }
+	    }
+	    
+	    // Check vertical
+	    for (int col = 0; col < width; col++) {
+	        int swin = 0;
+	        int owin = 0;
 
-		// Check horizontal
-		for (int row = 0; row < height; row++) {
-			int swin = 0;
-			int owin = 0;
+	        for (int i = 0; i < height; i++) {
+	            if (board[i][col].equals(self)) {
+	                owin = 0;
+	                swin++;
+	            }
+	            if (board[i][col].equals(opponent)) {
+	                swin = 0;
+	                owin++;
+	            }
+	            if (swin == win) return 10;
+	            if (owin == win) return -10;
+	        }
+	    }
+	    
+	    // Check diagonal
+	    int n = height;
+	    if (width < height) n = width;
 
-			for (int i = 0; i < width; i++) {
-				if (board[row][i].equals(self)) {
-					swin++;
-					owin = 0;
-				}
-				if (board[row][i].equals(opponent)) {
-					swin = 0;
-					owin++;
-				}
-				if (swin == win)
-					return 10;
-				if (owin == win)
-					return -10;
-			}
-		}
+	    int swin = 0;
+	    int owin = 0;
 
-		// Check vertical
-		for (int col = 0; col < width; col++) {
-			int swin = 0;
-			int owin = 0;
+	    for (int i = 0; i < n; i++) {
+	        if (board[i][i].equals(self)) {
+	            owin = 0;
+	            swin++;
+	        }
+	        if (board[i][i].equals(opponent)) {
+	            swin = 0;
+	            owin++;
+	        }
+	        if (swin == win) return 10;
+	        if (owin == win) return -10;
+	    }
+	    
+	    if (swin != win) swin = 0;
+	    if (owin != win) owin = 0;
 
-			for (int i = 0; i < height; i++) {
-				if (board[i][col].equals(self)) {
-					swin++;
-					owin = 0;
-				}
-				if (board[i][col].equals(opponent)) {
-					swin = 0;
-					owin++;
-				}
-				if (swin == win)
-					return 10;
-				if (owin == win)
-					return -10;
-			}
-		}
-
-		// Check diagonal
-		int n = height;
-		if (width < height) n = width;
-
-		int swin = 0;
-		int owin = 0;
-
-		for (int i = 0; i < n; i++) {
-			if (board[i][i].equals(self)) {
-				swin++;
-				owin = 0;
-			}
-			if (board[i][i].equals(opponent)) {
-				swin = 0;
-				owin++;
-			}
-			if (swin == win)
-				return 10;
-			if (owin == win)
-				return -10;
-		}
-
-		if (swin != win) swin = 0;
-		if (owin != win) owin = 0;
-
-		// Check anti-diagonal
-		for (int i = 0; i < n; i++) {
-			if (board[i][n - i - 1].equals(self)) {
-				swin++;
-				owin = 0;
-			}
-			if (board[i][n - i - 1].equals(opponent)) {
-				swin = 0;
-				owin++;
-			}
-			if (swin == win)
-				return 10;
-			if (owin == win)
-				return -10;
-		}
-
-		return 0;
+	    // Check anti-diagonal
+	    for (int i = 0; i < n; i++) {
+	        if (board[i][n - i - 1].equals(self)) {
+	            owin = 0;
+	            swin++;
+	        }
+	        if (board[i][n - i - 1].equals(opponent)) {
+	            swin = 0;
+	            owin++;
+	        }
+	        if (swin == win) return 10;
+	        if (owin == win) return -10;
+	    }
+	    
+	    return 0;
 	}
-
-
-
-
-
-
+	
+	
+	
+	
+	
+	
 	public String getId() {
 		return id;
 	}

@@ -1,5 +1,8 @@
 package to.epac.factorycraft.maptactoe;
 
+import java.io.File;
+
+import org.bukkit.ChatColor;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -12,6 +15,8 @@ import to.epac.factorycraft.maptactoe.tictactoe.GameManager;
 public class MapTacToe extends JavaPlugin {
 	
 	private static MapTacToe inst;
+	
+	private static File configFile;
 	
 	private GameManager gameManager;
 	
@@ -31,8 +36,13 @@ public class MapTacToe extends JavaPlugin {
 		
 		
 		
-		
-		
+		configFile = new File(getDataFolder(), "config.yml");
+        if (!configFile.exists()) {
+            getServer().getConsoleSender().sendMessage(ChatColor.RED + "Configuration not found. Generating the default one.");
+
+            getConfig().options().copyDefaults(true);
+            saveConfig();
+        }
 	}
 	
 	public void onDisable() {
