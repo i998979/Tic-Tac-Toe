@@ -1,4 +1,4 @@
-package to.epac.factorycraft.maptactoe.handlers;
+package to.epac.factorycraft.tictactoe.handlers;
 
 import java.util.UUID;
 
@@ -12,16 +12,16 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-import to.epac.factorycraft.maptactoe.MapTacToe;
-import to.epac.factorycraft.maptactoe.tictactoe.CellState;
-import to.epac.factorycraft.maptactoe.tictactoe.Game;
-import to.epac.factorycraft.maptactoe.tictactoe.participants.GameAI;
-import to.epac.factorycraft.maptactoe.tictactoe.participants.GamePlayer;
-import to.epac.factorycraft.maptactoe.utils.Utils;
+import to.epac.factorycraft.tictactoe.TicTacToe;
+import to.epac.factorycraft.tictactoe.tictactoe.CellState;
+import to.epac.factorycraft.tictactoe.tictactoe.Game;
+import to.epac.factorycraft.tictactoe.tictactoe.participants.GameAI;
+import to.epac.factorycraft.tictactoe.tictactoe.participants.GamePlayer;
+import to.epac.factorycraft.tictactoe.utils.Utils;
 
 public class CellPickHandler implements Listener {
 
-	private MapTacToe plugin = MapTacToe.inst();
+	private TicTacToe plugin = TicTacToe.inst();
 
 	@EventHandler
 	public void onPick(PlayerInteractEvent event) {

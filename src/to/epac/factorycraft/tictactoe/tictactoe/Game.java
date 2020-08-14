@@ -1,4 +1,4 @@
-package to.epac.factorycraft.maptactoe.tictactoe;
+package to.epac.factorycraft.tictactoe.tictactoe;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,14 +16,14 @@ import org.bukkit.scheduler.BukkitRunnable;
 import com.bergerkiller.bukkit.common.utils.ItemUtil;
 
 import net.md_5.bungee.api.ChatColor;
-import to.epac.factorycraft.maptactoe.MapTacToe;
-import to.epac.factorycraft.maptactoe.tictactoe.participants.GameAI;
-import to.epac.factorycraft.maptactoe.tictactoe.participants.GameParticipant;
-import to.epac.factorycraft.maptactoe.tictactoe.participants.GamePlayer;
+import to.epac.factorycraft.tictactoe.TicTacToe;
+import to.epac.factorycraft.tictactoe.tictactoe.participants.GameAI;
+import to.epac.factorycraft.tictactoe.tictactoe.participants.GameParticipant;
+import to.epac.factorycraft.tictactoe.tictactoe.participants.GamePlayer;
 
 public class Game {
 	
-	private MapTacToe plugin = MapTacToe.inst();
+	private TicTacToe plugin = TicTacToe.inst();
 	
 	public class Move {
 		int row;
@@ -245,66 +245,42 @@ public class Game {
 		String p2 = "";
 		
 		// X win
-		if (score == -10) {
-			
-			
-			
-		}
-		// O win
-		else if (score == 10) {
-			
-			
-			
-		}
-		// Draw
-		else {
-			
-			
-			
-		}
-		
-		
-		
-		
-		
-		
-		// X win
-		/*if (score == -10) {
+		if (score == 10) {
 			
 			if (player1 instanceof GameAI) {
 				winner = "AI";
-				gcmd = cmd.winAI;
+				gcmd.addAll(cmd.winAI);
 			} else if (player1 instanceof GamePlayer) {
 				winner = ((GamePlayer) player1).getPlayer().getName();
-				gcmd = cmd.winPlayer;
+				gcmd.addAll(cmd.winPlayer);
 			}
 			
 			
 			if (player2 instanceof GameAI) {
 				loser = "AI";
-				gcmd = cmd.loseAI;
+				gcmd.addAll(cmd.loseAI);
 			} else if (player2 instanceof GamePlayer) {
 				loser = ((GamePlayer) player2).getPlayer().getName();
-				gcmd = cmd.losePlayer;
+				gcmd.addAll(cmd.losePlayer);
 			}
 		}
 		// O win
-		else if (score == 10) {
+		else if (score == -10) {
 			if (player1 instanceof GameAI) {
 				loser = "AI";
-				gcmd = cmd.loseAI;
+				gcmd.addAll(cmd.loseAI);
 			} else if (player1 instanceof GamePlayer) {
 				loser = ((GamePlayer) player1).getPlayer().getName();
-				gcmd = cmd.losePlayer;
+				gcmd.addAll(cmd.losePlayer);
 			}
 			
 			
 			if (player2 instanceof GameAI) {
 				winner = "AI";
-				gcmd = cmd.winAI;
+				gcmd.addAll(cmd.winAI);
 			} else if (player2 instanceof GamePlayer) {
 				winner = ((GamePlayer) player2).getPlayer().getName();
-				gcmd = cmd.winPlayer;
+				gcmd.addAll(cmd.winPlayer);
 			}
 		}
 		// Draw
@@ -315,12 +291,12 @@ public class Game {
 				// Player vs Player
 				if (player2 instanceof GamePlayer) {
 					p2 = ((GamePlayer) player2).getPlayer().getName();
-					gcmd = cmd.drawPlayer;
+					gcmd.addAll(cmd.drawPlayer);
 				}
 				// Player vs AI
 				else if (player2 instanceof GameAI) {
 					opponent = ((GamePlayer) player1).getPlayer().getName();
-					gcmd = cmd.drawAI;
+					gcmd.addAll(cmd.drawAI);
 				}
 			}
 			if (player1 instanceof GameAI) {
@@ -329,10 +305,10 @@ public class Game {
 				// AI vs Player
 				if (player2 instanceof GamePlayer) {
 					opponent = ((GamePlayer) player2).getPlayer().getName();
-					gcmd = cmd.drawAI;
+					gcmd.addAll(cmd.drawAI);
 				}
 			}
-		}*/
+		}
 		
 		for (String cmd : gcmd) {
 			cmd = cmd.replace("%id%", id)
@@ -427,7 +403,7 @@ public class Game {
 			if (board[m][m].isEmpty()) {
 				Move move = new Move(m, m, 10);
 
-				MapTacToe.inst().getLogger().info("(M) Next best move of " + id +
+				TicTacToe.inst().getLogger().info("(M) Next best move of " + id +
 						" is (" + move.row + ", " + move.col + ") with score " + move.val);
 				return move;
 			}
@@ -462,7 +438,7 @@ public class Game {
 		// Move move = moves.get(rand.nextInt(moves.size()));
 		Move move = moves.get(0);
 
-		MapTacToe.inst().getLogger().info("Next best move of " + id +
+		TicTacToe.inst().getLogger().info("Next best move of " + id +
 				" is (" + move.row + ", " + move.col + ") with score " + move.val);
 
 		return move;

@@ -1,4 +1,4 @@
-package to.epac.factorycraft.maptactoe.utils;
+package to.epac.factorycraft.tictactoe.utils;
 
 import org.bukkit.Location;
 

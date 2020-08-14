@@ -1,4 +1,4 @@
-package to.epac.factorycraft.maptactoe.handlers;
+package to.epac.factorycraft.tictactoe.handlers;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -10,13 +10,13 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 
-import to.epac.factorycraft.maptactoe.MapTacToe;
-import to.epac.factorycraft.maptactoe.tictactoe.Game;
-import to.epac.factorycraft.maptactoe.utils.Utils;
+import to.epac.factorycraft.tictactoe.TicTacToe;
+import to.epac.factorycraft.tictactoe.tictactoe.Game;
+import to.epac.factorycraft.tictactoe.utils.Utils;
 
 public class MapClickHandler implements Listener {
 	
-	private MapTacToe plugin = MapTacToe.inst();
+	private TicTacToe plugin = TicTacToe.inst();
 	
 	@EventHandler
 	public void cellClick(PlayerInteractEntityEvent event) {

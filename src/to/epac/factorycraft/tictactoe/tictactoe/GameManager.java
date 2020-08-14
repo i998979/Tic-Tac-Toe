@@ -1,4 +1,4 @@
-package to.epac.factorycraft.maptactoe.tictactoe;
+package to.epac.factorycraft.tictactoe.tictactoe;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,18 +15,18 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ItemFrame;
 
-import to.epac.factorycraft.maptactoe.MapTacToe;
-import to.epac.factorycraft.maptactoe.tictactoe.participants.GameAI;
-import to.epac.factorycraft.maptactoe.tictactoe.participants.GameParticipant;
-import to.epac.factorycraft.maptactoe.tictactoe.participants.GamePlayer;
+import to.epac.factorycraft.tictactoe.TicTacToe;
+import to.epac.factorycraft.tictactoe.tictactoe.participants.GameAI;
+import to.epac.factorycraft.tictactoe.tictactoe.participants.GameParticipant;
+import to.epac.factorycraft.tictactoe.tictactoe.participants.GamePlayer;
 
 public class GameManager {
 	
 	private ArrayList<Game> games;
 	
-	private MapTacToe plugin;
+	private TicTacToe plugin;
 	
-	public GameManager(MapTacToe plugin) {
+	public GameManager(TicTacToe plugin) {
 		
 		this.plugin = plugin;
 		
@@ -42,18 +42,18 @@ public class GameManager {
 		plugin.getLogger().info("Loading GameManager...");
 		
 		FileConfiguration conf = plugin.getConfig();
-        for (String id : conf.getConfigurationSection("MapTacToe").getKeys(false)) {
+        for (String id : conf.getConfigurationSection("TicTacToe").getKeys(false)) {
             try {
             	GameParticipant p1 = null;
             	GameParticipant p2 = null;
             	
-            	if (conf.isSet("MapTacToe." + id + ".Participants.AI")) {
+            	if (conf.isSet("TicTacToe." + id + ".Participants.AI")) {
             		// AI, if exist, check start first or not
             		
-            		String symbol = conf.getString("MapTacToe." + id + ".Participants.AI.Symbol", "circle.png");
-            		int diff = conf.getInt("MapTacToe." + id + ".Participants.AI.Difficulty", 1);
-            		int delay = conf.getInt("MapTacToe." + id + ".Participants.AI.Delay", 20);
-            		boolean startFirst = conf.getBoolean("MapTacToe." + id + ".Participants.AI.StartFirst", false);
+            		String symbol = conf.getString("TicTacToe." + id + ".Participants.AI.Symbol", "circle.png");
+            		int diff = conf.getInt("TicTacToe." + id + ".Participants.AI.Difficulty", 1);
+            		int delay = conf.getInt("TicTacToe." + id + ".Participants.AI.Delay", 20);
+            		boolean startFirst = conf.getBoolean("TicTacToe." + id + ".Participants.AI.StartFirst", false);
             		
             		if (startFirst)
             			p1 = new GameAI(symbol, diff, delay, startFirst);
@@ -63,16 +63,16 @@ public class GameManager {
             	else {
             		// PlayerB, if no AI, B must be P2
             		
-            		String symbol = conf.getString("MapTacToe." + id + ".Participants.PlayerB.Symbol", "cross.png");
-                	// String uuid = conf.getString("MapTacToe." + id + ".Participants.PlayerB.UUID");
+            		String symbol = conf.getString("TicTacToe." + id + ".Participants.PlayerB.Symbol", "cross.png");
+                	// String uuid = conf.getString("TicTacToe." + id + ".Participants.PlayerB.UUID");
                 	
             		// p2 = new GamePlayer(symbol, uuid);
             		p2 = new GamePlayer(symbol);
             	}
             	
             	// PlayerA, P1 when P2 exist, P2 when AI exist
-            	String symbol = conf.getString("MapTacToe." + id + ".Participants.PlayerA.Symbol", "circle.png");
-            	// String uuid = conf.getString("MapTacToe." + id + ".Participants.PlayerA.UUID");
+            	String symbol = conf.getString("TicTacToe." + id + ".Participants.PlayerA.Symbol", "circle.png");
+            	// String uuid = conf.getString("TicTacToe." + id + ".Participants.PlayerA.UUID");
             	
             	if (p1 == null)
             		// p1 = new GamePlayer(symbol, uuid);
@@ -81,28 +81,28 @@ public class GameManager {
             		// p2 = new GamePlayer(symbol, uuid);
             		p2 = new GamePlayer(symbol);
             	
-            	int width = conf.getInt("MapTacToe." + id + ".Settings.Width", 3);
-            	int height = conf.getInt("MapTacToe." + id + ".Settings.Height", 3);
-            	BlockFace facing = BlockFace.valueOf(conf.getString("MapTacToe." + id + ".Settings.Facing", "EAST"));
-            	int win = conf.getInt("MapTacToe." + id + ".Settings.Win", 3);
-            	int time = conf.getInt("MapTacToe." + id + ".Settings.Time", 100);
-            	int expire = conf.getInt("MapTacToe." + id + ".Settings.Expire", 2400);
-            	int reset = conf.getInt("MapTacToe." + id + ".Settings.Reset", 100);
+            	int width = conf.getInt("TicTacToe." + id + ".Settings.Width", 3);
+            	int height = conf.getInt("TicTacToe." + id + ".Settings.Height", 3);
+            	BlockFace facing = BlockFace.valueOf(conf.getString("TicTacToe." + id + ".Settings.Facing", "EAST"));
+            	int win = conf.getInt("TicTacToe." + id + ".Settings.Win", 3);
+            	int time = conf.getInt("TicTacToe." + id + ".Settings.Time", 100);
+            	int expire = conf.getInt("TicTacToe." + id + ".Settings.Expire", 2400);
+            	int reset = conf.getInt("TicTacToe." + id + ".Settings.Reset", 100);
             	
-            	List<String> winAI = conf.getStringList("MapTacToe." + id + ".Commands.Win.AI");
-            	List<String> winPlayer = conf.getStringList("MapTacToe." + id + ".Commands.Win.Player");
+            	List<String> winAI = conf.getStringList("TicTacToe." + id + ".Commands.Win.AI");
+            	List<String> winPlayer = conf.getStringList("TicTacToe." + id + ".Commands.Win.Player");
             	
-            	List<String> loseAI = conf.getStringList("MapTacToe." + id + ".Commands.Lose.AI");
-            	List<String> losePlayer = conf.getStringList("MapTacToe." + id + ".Commands.Lose.Player");
+            	List<String> loseAI = conf.getStringList("TicTacToe." + id + ".Commands.Lose.AI");
+            	List<String> losePlayer = conf.getStringList("TicTacToe." + id + ".Commands.Lose.Player");
             	
-            	List<String> drawAI = conf.getStringList("MapTacToe." + id + ".Commands.Draw.AI");
-            	List<String> drawPlayer = conf.getStringList("MapTacToe." + id + ".Commands.Draw.Player");
+            	List<String> drawAI = conf.getStringList("TicTacToe." + id + ".Commands.Draw.AI");
+            	List<String> drawPlayer = conf.getStringList("TicTacToe." + id + ".Commands.Draw.Player");
             	
             	GameCommand cmd = new GameCommand(winAI, winPlayer, loseAI, losePlayer, drawAI, drawPlayer);
             	
             	
-            	Location top = conf.getLocation("MapTacToe." + id + ".Locations.Top");
-            	Location btm = conf.getLocation("MapTacToe." + id + ".Locations.Bottom");
+            	Location top = conf.getLocation("TicTacToe." + id + ".Locations.Top");
+            	Location btm = conf.getLocation("TicTacToe." + id + ".Locations.Bottom");
             	
             	// TODO - Load incomplete game's data in world
             	
@@ -110,7 +110,7 @@ public class GameManager {
             	games.add(game);
             	
             } catch (Exception e) {
-                plugin.getLogger().warning("Error loading MapTacToe id " + id + ".");
+                plugin.getLogger().warning("Error loading TicTacToe id " + id + ".");
                 e.printStackTrace();
                 continue;
             }
@@ -192,9 +192,17 @@ public class GameManager {
 		return games;
 	}
 	
-	public Game getGame(UUID uuid) {
+	public Game getGameById(String id) {
 		for (Game game : games) {
-			
+			if (game.getId().equalsIgnoreCase(id))
+				return game;
+		}
+		
+		return null;
+	}
+	
+	public Game getGameByPlayer(UUID uuid) {
+		for (Game game : games) {
 			GamePlayer gp = null;
 			
 			if (game.getPlayer1() instanceof GamePlayer)

@@ -1,4 +1,4 @@
-package to.epac.factorycraft.maptactoe;
+package to.epac.factorycraft.tictactoe;
 
 import java.io.File;
 
@@ -6,15 +6,14 @@ import org.bukkit.ChatColor;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import to.epac.factorycraft.maptactoe.commands.Commands;
-import to.epac.factorycraft.maptactoe.handlers.CellPickHandler;
-import to.epac.factorycraft.maptactoe.handlers.MapClickHandler;
-import to.epac.factorycraft.maptactoe.handlers.MapSetupHandler;
-import to.epac.factorycraft.maptactoe.tictactoe.GameManager;
+import to.epac.factorycraft.tictactoe.commands.Commands;
+import to.epac.factorycraft.tictactoe.handlers.CellPickHandler;
+import to.epac.factorycraft.tictactoe.handlers.MapClickHandler;
+import to.epac.factorycraft.tictactoe.tictactoe.GameManager;
 
-public class MapTacToe extends JavaPlugin {
+public class TicTacToe extends JavaPlugin {
 	
-	private static MapTacToe inst;
+	private static TicTacToe inst;
 	
 	private static File configFile;
 	
@@ -30,9 +29,8 @@ public class MapTacToe extends JavaPlugin {
 		PluginManager pm = this.getServer().getPluginManager();
 		pm.registerEvents(new CellPickHandler(), this);
 		pm.registerEvents(new MapClickHandler(), this);
-		pm.registerEvents(new MapSetupHandler(), this);
 		
-		getCommand("MapTacToe").setExecutor(new Commands());
+		getCommand("TicTacToe").setExecutor(new Commands());
 		
 		
 		
@@ -43,6 +41,17 @@ public class MapTacToe extends JavaPlugin {
             getConfig().options().copyDefaults(true);
             saveConfig();
         }
+        
+        File circle = new File(getDataFolder(), "circle.png");
+		if (!circle.exists()) {
+			saveResource("circle.png", false);
+		}
+		
+		File cross = new File(getDataFolder(), "cross.png");
+		if (!cross.exists()) {
+			saveResource("cross.png", false);
+		}
+        
 	}
 	
 	public void onDisable() {
@@ -53,7 +62,7 @@ public class MapTacToe extends JavaPlugin {
 		
 	}
 	
-	public static MapTacToe inst() {
+	public static TicTacToe inst() {
 		return inst;
 	}
 	

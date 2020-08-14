@@ -1,4 +1,4 @@
-package to.epac.factorycraft.maptactoe.tictactoe.participants;
+package to.epac.factorycraft.tictactoe.tictactoe.participants;
 
 import java.util.UUID;
 

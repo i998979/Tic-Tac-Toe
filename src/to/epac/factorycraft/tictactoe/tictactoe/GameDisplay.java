@@ -1,15 +1,15 @@
-package to.epac.factorycraft.maptactoe.tictactoe;
+package to.epac.factorycraft.tictactoe.tictactoe;
 
 import java.io.File;
 
 import com.bergerkiller.bukkit.common.map.MapDisplay;
 import com.bergerkiller.bukkit.common.map.MapTexture;
 
-import to.epac.factorycraft.maptactoe.MapTacToe;
+import to.epac.factorycraft.tictactoe.TicTacToe;
 
 public class GameDisplay extends MapDisplay {
 	
-	private MapTacToe plugin = MapTacToe.inst();
+	private TicTacToe plugin = TicTacToe.inst();
 	
 	@Override
 	public void onTick() {

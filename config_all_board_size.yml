@@ -1,0 +1,379 @@
+TicTacToe:
+  3x3:
+    Participants:
+      AI:
+        Symbol: "circle.png"
+        Difficulty: 20
+        Delay: 20
+        StartFirst: true
+      PlayerA:
+        Symbol: "cross.png"
+      # Either AI or PlayerB, if both are enabled, use AI
+      # PlayerB:
+        # Symbol: "circle.png"
+    Settings:
+      Width: 3
+      Height: 3
+      Facing: EAST
+      Win: 3
+      Time: 100
+      Expire: 2400
+      Reset: 100
+    Commands:
+      Win:
+        AI:
+        - "say &aAI has won Tic Tac Toe %id% in fighting %loser%!"
+        Player:
+        - "say &a%winner% has won Tic Tac Toe %id% in fighting %loser%!"
+        - "eco give %winner% 10"
+      # Available: %winner% %loser%
+      Lose:
+        AI:
+        # - "say &aAI has lost Tic Tac Toe %id% in fighting %winner%!"
+        - "say &c&lPUZZLE FAIL! &bAI &elost Tic Tac Toe! &4Y&ci&6k&ee&as&2!"
+        Player:
+        # - "say &a%loser% has lost Tic Tac Toe %id% in fighting %winner%!"
+        - "say &c&lPUZZLE FAIL! &b%loser% &elost Tic Tac Toe! &4Y&ci&6k&ee&as&2!"
+        - "eco take %loser% 10"
+      Draw:
+        # Available: %opponent%
+        AI:
+        - "say &aAI has draw Tic Tac Toe %id% in fighting %opponent%!"
+        # Available: %p1% %p2%
+        Player:
+        - "say &a%p1% has draw Tic Tac Toe %id% in fighting %p2%!"
+    Locations:
+      Top:
+        ==: org.bukkit.Location
+        world: dungeon
+        x: 110.0
+        y: 6.0
+        z: 250.0
+        pitch: 0.0
+        yaw: 0.0
+      Bottom:
+        ==: org.bukkit.Location
+        world: dungeon
+        x: 110.0
+        y: 4.0
+        z: 248.0
+        pitch: 0.0
+        yaw: 0.0
+    Datas:
+    - "   "
+    - "   "
+    - "   "
+  3x3gap:
+    Participants:
+      AI:
+        Symbol: "circle.png"
+        Difficulty: 0
+        Delay: 20
+        StartFirst: true
+      PlayerA:
+        Symbol: "cross.png"
+      # Either AI or PlayerB, if both are enabled, use AI
+      # PlayerB:
+        # Symbol: "circle.png"
+    Settings:
+      Width: 3
+      Height: 3
+      Facing: SOUTH
+      Win: 3
+      Time: 100
+      Expire: 60
+      Reset: 100
+    Commands:
+      Win:
+        AI:
+        - "say &aAI has won Tic Tac Toe %id% in fighting %loser%!"
+        Player:
+        - "say &a%winner% has won Tic Tac Toe %id% in fighting %loser%!"
+        - "eco give %winner% 10"
+      # Available: %winner% %loser%
+      Lose:
+        AI:
+        # - "say &aAI has lost Tic Tac Toe %id% in fighting %winner%!"
+        - "say &c&lPUZZLE FAIL! &bAI &elost Tic Tac Toe! &4Y&ci&6k&ee&as&2!"
+        Player:
+        # - "say &a%loser% has lost Tic Tac Toe %id% in fighting %winner%!"
+        - "say &c&lPUZZLE FAIL! &b%loser% &elost Tic Tac Toe! &4Y&ci&6k&ee&as&2!"
+        - "eco take %loser% 10"
+      Draw:
+        # Available: %opponent%
+        AI:
+        - "say &aAI has draw Tic Tac Toe %id% in fighting %opponent%!"
+        # Available: %p1% %p2%
+        Player:
+        - "say &a%p1% has draw Tic Tac Toe %id% in fighting %p2%!"
+    Locations:
+      Top:
+        ==: org.bukkit.Location
+        world: dungeon
+        x: 109.0
+        y: 8.0
+        z: 238.0
+        pitch: 0.0
+        yaw: 0.0
+      Bottom:
+        ==: org.bukkit.Location
+        world: dungeon
+        x: 113.0
+        y: 4.0
+        z: 238.0
+        pitch: 0.0
+        yaw: 0.0
+    Datas:
+    - "   "
+    - "   "
+    - "   "
+  slope:
+    Participants:
+      AI:
+        Symbol: "circle.png"
+        Difficulty: 1
+        Delay: 20
+        StartFirst: true
+      PlayerA:
+        Symbol: "cross.png"
+      # Either AI or PlayerB, if both are enabled, use AI
+      # PlayerB:
+        # Symbol: "circle.png"
+    Settings:
+      Width: 3
+      Height: 3
+      Facing: SOUTH
+      Win: 3
+      Time: 100
+      Expire: 2400
+      Reset: 100
+    Commands:
+      Win:
+        AI:
+        - "say &aAI has won Tic Tac Toe %id% in fighting %loser%!"
+        Player:
+        - "say &a%winner% has won Tic Tac Toe %id% in fighting %loser%!"
+        - "eco give %winner% 10"
+      # Available: %winner% %loser%
+      Lose:
+        AI:
+        - "say &aAI has lost Tic Tac Toe %id% in fighting %winner%!"
+        Player:
+        - "say &a%loser% has lost Tic Tac Toe %id% in fighting %winner%!"
+        - "eco take %loser% 10"
+      Draw:
+        # Available: %opponent%
+        AI:
+        - "say &aAI has draw Tic Tac Toe %id% in fighting %opponent%!"
+        # Available: %p1% %p2%
+        Player:
+        - "say &a%p1% has draw Tic Tac Toe %id% in fighting %p2%!"
+    Locations:
+      Top:
+        ==: org.bukkit.Location
+        world: dungeon
+        x: 117.0
+        y: 6.0
+        z: 250.0
+        pitch: 0.0
+        yaw: 0.0
+      Bottom:
+        ==: org.bukkit.Location
+        world: dungeon
+        x: 119.0
+        y: 4.0
+        z: 252.0
+        pitch: 0.0
+        yaw: 0.0
+    Datas:
+    - "   "
+    - "   "
+    - "   "
+  5x5:
+    Participants:
+      AI:
+        Symbol: "circle.png"
+        Difficulty: 1
+        Delay: 20
+        StartFirst: true
+      PlayerA:
+        Symbol: "cross.png"
+      # Either AI or PlayerB, if both are enabled, use AI
+      # PlayerB:
+        # Symbol: "circle.png"
+    Settings:
+      Width: 5
+      Height: 5
+      Facing: NORTH
+      Win: 5
+      Time: 100
+      Expire: 2400
+      Reset: 100
+    Commands:
+      Win:
+        AI:
+        - "say &aAI has won Tic Tac Toe %id% in fighting %loser%!"
+        Player:
+        - "say &a%winner% has won Tic Tac Toe %id% in fighting %loser%!"
+        - "eco give %winner% 10"
+      # Available: %winner% %loser%
+      Lose:
+        AI:
+        - "say &aAI has lost Tic Tac Toe %id% in fighting %winner%!"
+        Player:
+        - "say &a%loser% has lost Tic Tac Toe %id% in fighting %winner%!"
+        - "eco take %loser% 10"
+      Draw:
+        # Available: %opponent%
+        AI:
+        - "say &aAI has draw Tic Tac Toe %id% in fighting %opponent%!"
+        # Available: %p1% %p2%
+        Player:
+        - "say &a%p1% has draw Tic Tac Toe %id% in fighting %p2%!"
+    Locations:
+      Top:
+        ==: org.bukkit.Location
+        world: dungeon
+        x: 115.0
+        y: 8.0
+        z: 252.0
+        pitch: 0.0
+        yaw: 0.0
+      Bottom:
+        ==: org.bukkit.Location
+        world: dungeon
+        x: 111.0
+        y: 4.0
+        z: 252.0
+        pitch: 0.0
+        yaw: 0.0
+    Datas:
+    - "   "
+    - "   "
+    - "   "
+  4x4:
+    Participants:
+      AI:
+        Symbol: "circle.png"
+        Difficulty: 1
+        Delay: 20
+        StartFirst: true
+      PlayerA:
+        Symbol: "cross.png"
+      # Either AI or PlayerB, if both are enabled, use AI
+      # PlayerB:
+        # Symbol: "circle.png"
+    Settings:
+      Width: 4
+      Height: 4
+      Facing: WEST
+      Win: 4
+      Time: 100
+      Expire: 2400
+      Reset: 100
+    Commands:
+      Win:
+        AI:
+        - "say &aAI has won Tic Tac Toe %id% in fighting %loser%!"
+        Player:
+        - "say &a%winner% has won Tic Tac Toe %id% in fighting %loser%!"
+        - "eco give %winner% 10"
+      # Available: %winner% %loser%
+      Lose:
+        AI:
+        - "say &aAI has lost Tic Tac Toe %id% in fighting %winner%!"
+        Player:
+        - "say &a%loser% has lost Tic Tac Toe %id% in fighting %winner%!"
+        - "eco take %loser% 10"
+      Draw:
+        # Available: %opponent%
+        AI:
+        - "say &aAI has draw Tic Tac Toe %id% in fighting %opponent%!"
+        # Available: %p1% %p2%
+        Player:
+        - "say &a%p1% has draw Tic Tac Toe %id% in fighting %p2%!"
+    Locations:
+      Top:
+        ==: org.bukkit.Location
+        world: dungeon
+        x: 115.0
+        y: 7.0
+        z: 243.0
+        pitch: 0.0
+        yaw: 0.0
+      Bottom:
+        ==: org.bukkit.Location
+        world: dungeon
+        x: 115.0
+        y: 4.0
+        z: 246.0
+        pitch: 0.0
+        yaw: 0.0
+    Datas:
+    - "   "
+    - "   "
+    - "   "
+  4x3:
+    Participants:
+      AI:
+        Symbol: "circle.png"
+        Difficulty: 1
+        Delay: 20
+        StartFirst: true
+      PlayerA:
+        Symbol: "cross.png"
+      # Either AI or PlayerB, if both are enabled, use AI
+      # PlayerB:
+        # Symbol: "circle.png"
+    Settings:
+      Width: 4
+      Height: 3
+      Facing: EAST
+      Win: 3
+      Time: 100
+      Expire: 2400
+      Reset: 100
+    Commands:
+      Win:
+        AI:
+        - "say &aAI has won Tic Tac Toe %id% in fighting %loser%!"
+        Player:
+        - "say &a%winner% has won Tic Tac Toe %id% in fighting %loser%!"
+        - "eco give %winner% 10"
+      # Available: %winner% %loser%
+      Lose:
+        AI:
+        # - "say &aAI has lost Tic Tac Toe %id% in fighting %winner%!"
+        - "say &c&lPUZZLE FAIL! &bAIr% &elost Tic Tac Toe! &4Y&ci&6k&ee&as&2!"
+        Player:
+        # - "say &a%loser% has lost Tic Tac Toe %id% in fighting %winner%!"
+        - "say &c&lPUZZLE FAIL! &b%lsoer% &elost Tic Tac Toe! &4Y&ci&6k&ee&as&2!"
+        - "eco take %loser% 10"
+      Draw:
+        # Available: %opponent%
+        AI:
+        - "say &aAI has draw Tic Tac Toe %id% in fighting %opponent%!"
+        # Available: %p1% %p2%
+        Player:
+        - "say &a%p1% has draw Tic Tac Toe %id% in fighting %p2%!"
+    Locations:
+      Top:
+        ==: org.bukkit.Location
+        world: dungeon
+        x: 105.0
+        y: 6.0
+        z: 245.0
+        pitch: 0.0
+        yaw: 0.0
+      Bottom:
+        ==: org.bukkit.Location
+        world: dungeon
+        x: 105.0
+        y: 4.0
+        z: 242.0
+        pitch: 0.0
+        yaw: 0.0
+    Datas:
+    - "   "
+    - "   "
+    - "   "
