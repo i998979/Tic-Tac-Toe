@@ -25,10 +25,10 @@ TicTacToe:
         - "eco give %winner% 10"
       # Available: %winner% %loser%
       Lose:
-        AI:
-        - "say &aAI has lost Tic Tac Toe %id% in fighting %winner%!"
+        AI: 
+        - "say &c&lPUZZLE FAIL! &bAI &elost Tic Tac Toe! &4Y&ci&6k&ee&as&2!"
         Player:
-        - "say &a%loser% has lost Tic Tac Toe %id% in fighting %winner%!"
+        - "say &c&lPUZZLE FAIL! &b%loser% &elost Tic Tac Toe! &4Y&ci&6k&ee&as&2!"
         - "eco take %loser% 10"
       Draw:
         # Available: %opponent%

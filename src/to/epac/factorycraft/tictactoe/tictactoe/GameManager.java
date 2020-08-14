@@ -16,6 +16,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.ItemFrame;
 
 import to.epac.factorycraft.tictactoe.TicTacToe;
+import to.epac.factorycraft.tictactoe.tictactoe.Game.CellState;
 import to.epac.factorycraft.tictactoe.tictactoe.participants.GameAI;
 import to.epac.factorycraft.tictactoe.tictactoe.participants.GameParticipant;
 import to.epac.factorycraft.tictactoe.tictactoe.participants.GamePlayer;

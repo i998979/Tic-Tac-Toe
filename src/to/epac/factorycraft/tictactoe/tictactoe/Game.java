@@ -25,6 +25,10 @@ public class Game {
 	
 	private TicTacToe plugin = TicTacToe.inst();
 	
+	public enum CellState {
+		X, O;
+	}
+	
 	public class Move {
 		int row;
 		int col;
@@ -36,7 +40,7 @@ public class Game {
 			this.val = val;
 		}
 	}
-
+	
 	private String id;
 
 	private int difficulty;
@@ -215,11 +219,6 @@ public class Game {
 		ItemUtil.getMetaTag(item).putValue("State", symbol);
 
 		ItemFrame frame = loc.getWorld().spawn(loc, ItemFrame.class);
-		/*frame.setFacingDirection(facing, true);
-		
-		Bukkit.getScheduler().runTaskLater(plugin, runnable -> {
-			frame.setItem(item);
-		}, 5);*/
 		frame.setItem(item);
 		
 		lastUpdate = System.currentTimeMillis();

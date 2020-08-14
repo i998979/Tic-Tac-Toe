@@ -13,8 +13,8 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 import to.epac.factorycraft.tictactoe.TicTacToe;
-import to.epac.factorycraft.tictactoe.tictactoe.CellState;
 import to.epac.factorycraft.tictactoe.tictactoe.Game;
+import to.epac.factorycraft.tictactoe.tictactoe.Game.CellState;
 import to.epac.factorycraft.tictactoe.tictactoe.participants.GameAI;
 import to.epac.factorycraft.tictactoe.tictactoe.participants.GamePlayer;
 import to.epac.factorycraft.tictactoe.utils.Utils;
